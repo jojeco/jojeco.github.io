@@ -1,0 +1,349 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding-top: 150px;
+    color: #333333;
+    background: #ffffff;
+}
+
+header {
+    background: linear-gradient(to bottom, rgb(37, 37, 37) 90%, #ffffff 100%);
+    color: #fff;
+    padding: 40px;
+    text-align: left;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    margin: 0;
+    animation: fadeInDown 1s ease-in-out;
+    font-family: 'Roboto', sans-serif;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+a {
+    color: #333333; /* or any other color you prefer */
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+    position: relative; /* Added for underline effect */
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: hsl(152, 95%, 30%); /* Underline color, adjust as needed */
+    left: 50%;
+    bottom: -5px; /* Adjust as needed */
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+a:hover {
+    color: hsl(152, 95%, 30%); /* Adjust hover color as needed */
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+    display: inline-flex;
+}
+
+nav ul {
+    padding: 0;
+    list-style: none;
+    display: inline-flex;
+}
+
+nav ul li {
+    display: inline;
+    margin: 5px 10px;
+    text-align: left;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+    position: relative; /* Added for underline effect */
+    margin: 0 15px;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: hsl(152, 95%, 30%); /* Underline color */
+    left: 50%;
+    bottom: -5px; /* Adjust as needed */
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+nav a:hover {
+    color: hsl(152, 95%, 30%);
+}
+
+section {
+    padding: 20px;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+li {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+i {
+    font-size: 2em;
+    transition: color 0.3s ease;
+    overflow: hidden; 
+    display: block;
+}
+
+  /* Hover effect for the icons */
+i:hover {
+    color: hsl(152, 95%, 30%); /* Change the color on hover */
+}
+
+#projects {
+    scroll-margin-top: 200px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#projects pre {
+    flex: 0 0 calc(48% - 20px); /* Adjust the width based on your preference */
+    margin: 10px; /* Adjust the margin based on your preference */
+    box-sizing: border-box;
+}
+
+#projects img {
+    max-height: 50%;
+    max-width: 70%;
+    height: auto;
+    display: block;
+    position: relative;
+    margin: 0 auto;
+}
+
+#projects code {
+    white-space: pre-wrap;
+    padding: 10px;
+    border-radius: 5px;
+    line-height: 1.5;
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+#education {
+    scroll-margin-top: 200px;
+}
+
+#mission {
+    scroll-margin-top: 200px;
+}
+
+section:hover {
+    transform: translateY(-5px);
+}
+
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+footer {
+    background: #333333;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    margin: 0 10px;
+}
+
+.menu-toggle {
+    display: none; /* Initially hide the button */
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* Adjust the existing media query to show/hide elements based on screen width */
+@media screen and (max-width: 768px) {
+    nav ul {
+        text-align: center;
+        display: none; /* Hide the navigation */
+    }
+
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    nav a {
+        margin: 0;
+    }
+
+    i {
+        font-size: 1.5em;
+    }
+    footer a {
+        margin: 0 5px;
+    }
+
+    .skills-category {
+        width: 100%;
+    }
+
+    .menu-toggle {
+        display: block; /* Show the hamburger icon button */
+    }
+    
+    .menu-toggle:hover {
+        color: hsl(152, 95%, 30%);
+    }
+
+    .skills-list li {
+        /* Adjust size or margins for smaller screens */
+        margin: 5px;
+        min-width: 40px;
+    }
+}
+
+#main-nav {
+    display: block;
+}
+
+#main-nav.show {
+    display: block;
+}
+
+.parallax {
+    /* The image used */
+    /* background-image: url('path-to-your-image.jpg');
+
+    /* Set a specific height */
+    min-height: 500px;
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#skills {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    scroll-margin-top: 200px;
+}
+
+.skills-category {
+    width: 99%; /* Adjust as needed */
+    padding: 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.skills-category h3 {
+    color: #333;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+.skills-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.skills-list li {
+    text-align: center;
+    margin: 5px;
+    padding: 5px;
+    min-width: 30px;
+}
+
+.skills-list i {
+    font-size: 2em;
+    transition: color 0.3s ease;
+}
+
+/* Hover effect for the icons */
+.skills-list i:hover {
+    color: hsl(152, 95%, 30%); /* Change the color on hover */
+}
+
+.mission-statement {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.mission-section {
+    margin-bottom: 20px;
+}
