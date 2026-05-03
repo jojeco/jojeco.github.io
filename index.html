@@ -1,221 +1,431 @@
-<!-- Add references. -->
-<!-- Spacing of DIVs doesn't work on smaller screens. Icons overflow. (Skills, Project) -->
-<!-- Fix the mobile nav, button doesn't work. -->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jordan Coomber| Portfolio</title>
-  <link rel="icon" type="image/x-icon" href="images/logo3.png">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="prism.css" />
-  <script src="https://kit.fontawesome.com/9cd22954d4.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jordan Coomber — Software Engineer</title>
+  <meta name="description" content="CS student and systems builder. Full-stack development, infrastructure engineering, and AI integration.">
+  <link rel="icon" type="image/png" href="images/logo3.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <header>
-    <h1>Jordan Coomber</h1>
-    <button class="menu-toggle">&#9776; Menu</button>
-    <nav id="main-nav">
-      <ul>
-        <li><a href="#mission">Mission Statement</a></li>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">jc<span class="accent">.</span></a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about">About</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#education">Education</a></li>
-        <li><a href="#accolades">Accolades</a></li>
-        <li><a href="Resume (IT Seminar).pdf" target="_blank">Resumé</a></li>
-        <li><a href="CoverLetter">CoverLetter</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
       </ul>
-    </nav>
-  </header>
-  <main>
-    <div class="parallax">
-      <section id="team-photo">
-        <br />
-        <img
-          style="max-width: 50%; max-height: 50%; display: block; margin-left: auto; margin-right: auto; scroll-margin-top: 200px;"
-          src="images/team2.png" alt="team photo" />
-        <br /><em style="font-weight: bold;">Penta Tech Solutions Team Photo</em><br />
-        <em>(Carlos, Julien, Ethan, Milicent, Myself)</em>
-      </section>
-      <section id="mission">
-        <div class="mission-statement">
-          <h4>My Mission Statement</h4>
-          <p>
-            As an aspiring IT professional, my mission is to study new technology
-            solutions to solve complex problems, enhance efficiency, and drive digital
-            transformation. I am committed to continuous learning and staying aware of
-            emerging technologies, ensuring that I can provide cutting-edge solutions
-            that meet both current and future needs. My goal is to gain new knowledge
-            and skills perpetually, creating a path for myself to advance in the world
-            of technology.
-          </p>
-        </div>
-        <br />
-        <hr>
-        <div class="mission-statement">
-          <h4>Always Learning</h4>
-          <p>
-            I am deeply dedicated to perpetual learning, recognizing
-            that the IT landscape is dynamic and demands constant adaptation. Staying
-            ahead of emerging technologies is not just a commitment but a passion,
-            ensuring that my skills remain at the forefront of industry advancements.
-          </p>
-        </div>
-        <br />
-        <hr>
-        <div class="mission-statement">
-          <h4>Driven to Innovate</h4>
-          <p>
-            My approach to technology extends to a genuine enthusiasm for solving
-            intricate problems. I embrace analytical thinking, creativity, and a
-            systematic approach to dissect complex challenges. I recognize the pivotal
-            role of technology in driving digital transformation. My focus is not just
-            on adopting the latest trends but on understanding how technology can align
-            with organizational goals, foster innovation, and lead to meaningful and
-            sustainable change.
-          </p>
-        </div>
-        <br />
-        <hr>
-        <div class="mission-statement">
-          <h4>Summary</h4>
-          <p>
-            In essence,
-            my mission is to be a driving force in the transformative potential of technology,
-            where continuous learning, problem-solving, and a future-oriented mindset converge
-            to create a meaningful impact on the IT landscape.
-          </p>
-        </div>
-        </p>
-      </section>
-      <section id="skills">
-        <div class="skills-category">
-          <h3>Technical Skills</h3>
-          <ul>
-            <li>
-              <i class="fab fa-cuttlefish"></i>
-              <p>C++ & C#</p>
-            </li>
-            <li>
-              <i class="fab fa-java"></i>
-              <p>Java</p>
-            </li>
-            <li>
-              <i class="fab fa-js"></i>
-              <p>JavaScript</p>
-            </li>
-            <li>
-              <i class="fab fa-html5"></i>
-              <p>HTML</p>
-            </li>
-            <li>
-              <i class="fab fa-css3-alt"></i>
-              <p>CSS</p>
-            </li>
-            <li>
-              <i class="fab fa-php"></i>
-              <p>PHP</p>
-            </li>
-            <li>
-              <i class="fas fa-server"></i>
-              <p>Apache</p>
-            </li>
-            <li>
-              <i class="fas fa-database"></i>
-              <p>MySQL</p>
-            </li>
-          </ul>
-        </div>
-        <div class="skills-category">
-          <h3>Core Values</h3>
-          <ul>
-            <li>
-              <i class="fas fa-comments"></i>
-              <p>Communication</p>
-            </li>
-            <li>
-              <i class="fas fa-users"></i>
-              <p>Teamwork</p>
-            </li>
-            <li>
-              <i class="fas fa-lightbulb"></i>
-              <p>Problem<br /> Solving</p>
-            </li>
-
-            <li>
-              <i class="fas fa-expand"></i>
-              <p>Adaptability</p>
-            </li>
-            <li>
-              <i class="fas fa-handshake"></i>
-              <p>Respect</p>
-            </li>
-            <li>
-              <i class="fas fa-history"></i>
-              <p>Persistence</p>
-            </li>
-          </ul>
-        </div>
-      </section>
-      <section id="projects">
-        <!-- Projects will be loaded here -->
-        <div id="project-list"></div>
-      </section>
-      <section id="education">
-        <i class="fas fa-graduation-cap"></i>
-        <div class="education-item">
-          <h2>Lethbridge College</h2>
-          <p>Computer Information Technology Diploma</p>
-          <p>Graduating April 2025</p>
-        </div>
-      </section>
-      <section id="accolades">
-        <i class="fas fa-trophy"></i>
-        <div class="accolades-item">
-          <h2>Accolades</h2>
-          <h3>References</h3>
-          <p>In resume</p>
-          <p></p>
-          <p></p>
-        </div>
     </div>
-  </main>
-  <footer>
-    <a href="https://github.com/" target="_blank">
-      <i class="fab fa-github"></i></a>
-    <!-- Include Font Awesome CSS in your <head> section -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  </nav>
 
-<!-- Email link with icon -->
-<a href="mailto:jojeco717@gmail.com" onclick="copyEmail(event)">
-    <i class="fas fa-envelope"></i>
-</a>
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <p class="hero-label">
+        <span class="terminal-prompt">&gt;</span> hello world
+      </p>
+      <h1 class="hero-name">Jordan Coomber</h1>
+      <p class="hero-tagline">CS student. Systems builder. Ships real things.</p>
+      <p class="hero-sub">Full-stack development, infrastructure engineering, and AI integration — from polished React frontends to a 46-container self-hosted lab with custom AI orchestration.</p>
+      <div class="hero-cta">
+        <a href="https://github.com/jojeco" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="mailto:jordan@jojeco.ca" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Get in Touch
+        </a>
+      </div>
+    </div>
+    <div class="hero-decoration" aria-hidden="true">
+      <div class="hero-grid"></div>
+    </div>
+  </section>
 
-<script>
-  function copyEmail(event) {
-      // Prevent the default mailto action
-      event.preventDefault();
-      
-      const email = 'jojeco717@gmail.com';
-      navigator.clipboard.writeText(email).then(() => {
-          alert('Email address copied to clipboard!');
-      }).catch(err => {
-          console.error('Failed to copy email: ', err);
-      });
-  }
-</script>
+  <!-- About -->
+  <section class="section" id="about">
+    <div class="container">
+      <h2 class="section-title">About</h2>
+      <div class="about-content">
+        <div class="about-text">
+          <p>I'm a Computer Science student at the University of Lethbridge with a completed diploma in Computer Information Technology from Lethbridge Polytechnic. I build things that work — and I care about how they're built.</p>
+          <p>My home lab runs 46+ Docker containers across 6 machines with zero cloud dependency. I designed the networking, containerization, DNS, monitoring, and a custom AI orchestration layer from scratch. When I'm not building infrastructure, I'm writing React frontends, designing REST APIs, or implementing drag-and-drop systems without reaching for a library.</p>
+          <p>I believe in shipping real things, learning by building, and choosing the hard path when it teaches you more.</p>
+        </div>
+        <div class="about-stats">
+          <div class="stat">
+            <span class="stat-number">46+</span>
+            <span class="stat-label">Docker Containers</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">6</span>
+            <span class="stat-label">Machines in Lab</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">10+</span>
+            <span class="stat-label">Projects Shipped</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- Skills -->
+  <section class="section section-alt" id="skills">
+    <div class="container">
+      <h2 class="section-title">Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&lt;/&gt;</span>
+            Languages
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-strong">JavaScript / TypeScript</span>
+            <span class="tag tag-strong">HTML / CSS</span>
+            <span class="tag tag-mid">C++</span>
+            <span class="tag tag-mid">SQL</span>
+            <span class="tag tag-mid">Bash / Shell</span>
+            <span class="tag">Java</span>
+            <span class="tag">Python</span>
+            <span class="tag">MIPS Assembly</span>
+            <span class="tag">PowerShell</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&#9632;</span>
+            Frontend
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-strong">React</span>
+            <span class="tag tag-strong">TypeScript</span>
+            <span class="tag tag-strong">Tailwind CSS</span>
+            <span class="tag tag-mid">Vite</span>
+            <span class="tag tag-mid">shadcn/ui</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&#9881;</span>
+            Backend &amp; Data
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-mid">Node.js</span>
+            <span class="tag tag-mid">Express</span>
+            <span class="tag tag-mid">REST API Design</span>
+            <span class="tag tag-mid">PostgreSQL</span>
+            <span class="tag">Firebase Auth / JWT</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&#9736;</span>
+            Infrastructure
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-strong">Docker / Docker Compose</span>
+            <span class="tag tag-mid">Proxmox</span>
+            <span class="tag tag-mid">Nginx</span>
+            <span class="tag tag-mid">Cloudflare Tunnels &amp; DNS</span>
+            <span class="tag">Prometheus / Grafana</span>
+            <span class="tag">Uptime Kuma</span>
+            <span class="tag">Tailscale</span>
+            <span class="tag">AdGuard Home</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&#10023;</span>
+            AI &amp; ML
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-mid">LiteLLM</span>
+            <span class="tag tag-mid">Ollama</span>
+            <span class="tag tag-mid">Claude Code / Anthropic API</span>
+            <span class="tag tag-mid">OpenAI API</span>
+            <span class="tag">MCP (Custom Server)</span>
+            <span class="tag">n8n</span>
+            <span class="tag">LangGraph</span>
+            <span class="tag">LibreChat / Open WebUI</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-category-title">
+            <span class="skill-icon">&#9650;</span>
+            Deploy &amp; DevOps
+          </h3>
+          <div class="skill-tags">
+            <span class="tag tag-mid">Vercel</span>
+            <span class="tag tag-mid">Railway</span>
+            <span class="tag tag-mid">Cloudflare Pages</span>
+            <span class="tag">GitHub Actions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <a href="https://www.linkedin.com/in/jordan-coombera906a1b9/" target="_blank"><i class="fab fa-linkedin"></i></a>
-    <p>&copy; 2024 Jordan Coomber</p>
+  <!-- Projects -->
+  <section class="section" id="projects">
+    <div class="container">
+      <h2 class="section-title">Projects</h2>
+      <div class="projects-grid">
+
+        <article class="project-card project-featured">
+          <div class="project-header">
+            <h3 class="project-name">JojeCo Home Lab</h3>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <p class="project-desc">46+ Docker containers across 6 machines with zero cloud dependency. Full architecture from scratch: networking, containerization, DNS, monitoring, and AI integration. Cloudflare Tunnels for external access.</p>
+          <p class="project-services">Services include LibreChat, LiteLLM, Authelia SSO, Nextcloud, Immich, Grafana, Prometheus, n8n, Gitea, Navidrome, Plex, and more.</p>
+          <div class="project-tags">
+            <span class="ptag">Docker</span>
+            <span class="ptag">Proxmox</span>
+            <span class="ptag">Nginx</span>
+            <span class="ptag">Cloudflare</span>
+            <span class="ptag">Prometheus</span>
+            <span class="ptag">Grafana</span>
+          </div>
+        </article>
+
+        <article class="project-card project-featured">
+          <div class="project-header">
+            <h3 class="project-name">AI Orchestration System</h3>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <p class="project-desc">Three-tier LLM routing system: human direction via Discord to Claude Code agent, which delegates to local models (Qwen, DeepSeek) via LiteLLM, with cloud APIs gated behind phone approval. Free by default, cloud as exception.</p>
+          <div class="project-tags">
+            <span class="ptag">Claude Code</span>
+            <span class="ptag">LiteLLM</span>
+            <span class="ptag">Ollama</span>
+            <span class="ptag">Discord</span>
+            <span class="ptag">MCP</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">Full-Stack Kanban System</h3>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <p class="project-desc">Custom drag-and-drop with zero third-party DnD libraries using pointer-event elementFromPoint. Optimistic UI with snapshot rollback. 6 targeted DB indexes, partial index on due_date, and full engineering documentation.</p>
+          <div class="project-tags">
+            <span class="ptag">React</span>
+            <span class="ptag">TypeScript</span>
+            <span class="ptag">Node.js</span>
+            <span class="ptag">Express</span>
+            <span class="ptag">PostgreSQL</span>
+            <span class="ptag">JWT</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">One Piece TCG Scanner</h3>
+            <span class="badge badge-design">In Design</span>
+          </div>
+          <p class="project-desc">Mobile card scanner with scan queue review buffer, hybrid image recognition + OCR, price tracking via TCGPlayer API, and decklist builder with AI-powered recommendations.</p>
+          <div class="project-tags">
+            <span class="ptag">React Native</span>
+            <span class="ptag">Expo</span>
+            <span class="ptag">Vision Camera</span>
+            <span class="ptag">TCGPlayer API</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">JojeCo Ops Dashboard</h3>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <p class="project-desc">Real-time service health monitoring for the home lab. Kiosk mode, weather widget, Uptime Kuma integration, GitHub activity feed, and server control panels.</p>
+          <div class="project-tags">
+            <span class="ptag">React</span>
+            <span class="ptag">TypeScript</span>
+            <span class="ptag">Vite</span>
+            <span class="ptag">Tailwind</span>
+            <span class="ptag">Firebase Auth</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">Scheduling System</h3>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <p class="project-desc">Real-time availability and booking management system with a React frontend on Vercel and Node.js backend on Railway.</p>
+          <div class="project-tags">
+            <span class="ptag">React</span>
+            <span class="ptag">Tailwind</span>
+            <span class="ptag">Node.js</span>
+            <span class="ptag">Express</span>
+            <span class="ptag">PostgreSQL</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">3D Printing Business Site</h3>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <p class="project-desc">Client work with Cloudflare Pages CI/CD. Clean marketing site with e-commerce roadmap delivered.</p>
+          <div class="project-tags">
+            <span class="ptag">HTML / CSS / JS</span>
+            <span class="ptag">Tailwind</span>
+            <span class="ptag">Cloudflare Pages</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">JojeCo MCP Server</h3>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <p class="project-desc">Custom MCP server at mcp.jojeco.ca exposing live lab data to AI agents. SSH execution, Prometheus queries, and n8n workflow triggers.</p>
+          <div class="project-tags">
+            <span class="ptag">Node.js</span>
+            <span class="ptag">MCP Protocol</span>
+            <span class="ptag">Docker</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">Home Network Redesign</h3>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <p class="project-desc">Full network rebuild: bridge mode, ASUS router, Cat7 cabling, switch + AP deployment. Cloudflare Tunnels and AdGuard DNS.</p>
+          <div class="project-tags">
+            <span class="ptag">Networking</span>
+            <span class="ptag">Cloudflare Tunnels</span>
+            <span class="ptag">AdGuard DNS</span>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-header">
+            <h3 class="project-name">CD Ripping Pipeline</h3>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <p class="project-desc">Automated lossless audio pipeline: EAC/XLD/Whipper to FLAC, feeding Plex and Navidrome for self-hosted music streaming.</p>
+          <div class="project-tags">
+            <span class="ptag">FLAC</span>
+            <span class="ptag">Plex</span>
+            <span class="ptag">Navidrome</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section class="section section-alt" id="education">
+    <div class="container">
+      <h2 class="section-title">Education</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">2024 &ndash; 2027 (Expected)</span>
+            <h3>BSc Computer Science</h3>
+            <p class="timeline-org">University of Lethbridge</p>
+            <p class="timeline-detail">3rd year. Coursework includes Algorithm Design &amp; Analysis, Software Design (OOP, design patterns, SOLID), and Computer Organization &amp; Architecture (MIPS assembly, ALU design).</p>
+            <p class="timeline-detail">Notable projects: "Mission Control" C++ card game with 4-class hierarchy and zero memory leaks, MIPS assembly state machine, algorithm analysis formal proofs.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">Completed</span>
+            <h3>Diploma, Computer Information Technology</h3>
+            <p class="timeline-org">Lethbridge Polytechnic</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section class="section" id="experience">
+    <div class="container">
+      <h2 class="section-title">Experience</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">June 2023 &ndash; Present</span>
+            <h3>Closing Supervisor &amp; Merchandiser</h3>
+            <p class="timeline-org">Shoppers Drug Mart</p>
+            <p class="timeline-detail">Manage closing operations, team coordination, and visual merchandising. Responsible for end-of-day procedures, cash reconciliation, and staff oversight.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">Nov 2021 &ndash; Nov 2022</span>
+            <h3>Keyholder &amp; Sales Associate</h3>
+            <p class="timeline-org">iWorld Connect</p>
+            <p class="timeline-detail">Manager on duty responsibilities. Completed Apple developer training. Direct customer-facing sales and technical support.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">Nov 2019 &ndash; Feb 2021</span>
+            <h3>Sales Associate</h3>
+            <p class="timeline-org">Best Buy</p>
+            <p class="timeline-detail">Consumer electronics sales with a focus on technical product knowledge and customer experience.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section section-alt" id="contact">
+    <div class="container">
+      <h2 class="section-title">Contact</h2>
+      <p class="contact-text">Interested in working together or want to talk shop? Reach out.</p>
+      <div class="contact-links">
+        <a href="https://github.com/jojeco" target="_blank" rel="noopener" class="contact-link">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span>github.com/jojeco</span>
+        </a>
+        <a href="mailto:jordan@jojeco.ca" class="contact-link">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>jordan@jojeco.ca</span>
+        </a>
+        <a href="https://www.linkedin.com/in/jordan-coombera906a1b9/" target="_blank" rel="noopener" class="contact-link">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <span>LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">&copy; 2026 Jordan Coomber &mdash; Lethbridge, AB, Canada</p>
+      <p class="footer-sub">Built with vanilla HTML, CSS, and JS. Hosted on GitHub Pages.</p>
+    </div>
   </footer>
-  <script src="prism.js"></script>
+
   <script src="script.js"></script>
 </body>
-
 </html>
