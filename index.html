@@ -38,15 +38,19 @@
       </p>
       <h1 class="hero-name">Jordan Coomber</h1>
       <p class="hero-tagline">CS student. Systems builder. Ships real things.</p>
-      <p class="hero-sub">Full-stack development, infrastructure engineering, and AI integration — from polished React frontends to a 72-container self-hosted lab with custom AI orchestration.</p>
+      <p class="hero-sub">Full-stack development, infrastructure engineering, and AI integration — from polished React/TypeScript frontends to an 80-container self-hosted lab running a custom multi-agent AI system on local GPU hardware.</p>
       <div class="hero-cta">
         <a href="https://github.com/jojeco" target="_blank" rel="noopener" class="btn btn-primary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           GitHub
         </a>
-        <a href="mailto:jordan@jojeco.ca" class="btn btn-secondary">
+        <a href="mailto:jojeco717@gmail.com" class="btn btn-secondary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           Get in Touch
+        </a>
+        <a href="Resume (IT Seminar).pdf" target="_blank" rel="noopener" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Resume
         </a>
       </div>
     </div>
@@ -62,21 +66,21 @@
       <div class="about-content">
         <div class="about-text">
           <p>I'm a Computer Science student at the University of Lethbridge with a completed diploma in Computer Information Technology from Lethbridge Polytechnic. I build things that work — and I care about how they're built.</p>
-          <p>My home lab runs 72+ Docker containers across 6 machines with zero cloud dependency. I designed the networking, containerization, DNS, monitoring, and a custom AI orchestration layer from scratch. When I'm not building infrastructure, I'm writing React frontends, designing REST APIs, or implementing drag-and-drop systems without reaching for a library.</p>
-          <p>I believe in shipping real things, learning by building, and choosing the hard path when it teaches you more.</p>
+          <p>My home lab runs 80+ Docker containers across 5 machines, with Proxmox hypervisor, Cloudflare Tunnels for zero-trust external access, and a full observability stack (Grafana, Prometheus, Loki). On top of that I built a custom AI orchestration system: a Claude Code agent (JoBot) managing local LLM workers via LiteLLM, with a three-tier delegation model and phone-gated cloud API escalation.</p>
+          <p>When I'm not building infrastructure, I'm writing React frontends, designing REST APIs, or implementing drag-and-drop systems without reaching for a library. I believe in shipping real things, learning by building, and choosing the hard path when it teaches you more.</p>
         </div>
         <div class="about-stats">
           <div class="stat">
-            <span class="stat-number">72+</span>
+            <span class="stat-number">80+</span>
             <span class="stat-label">Docker Containers</span>
           </div>
           <div class="stat">
-            <span class="stat-number">6</span>
+            <span class="stat-number">5</span>
             <span class="stat-label">Machines in Lab</span>
           </div>
           <div class="stat">
-            <span class="stat-number">10+</span>
-            <span class="stat-label">Projects Shipped</span>
+            <span class="stat-number">26</span>
+            <span class="stat-label">AI Models Hosted</span>
           </div>
         </div>
       </div>
@@ -96,11 +100,11 @@
           <div class="skill-tags">
             <span class="tag tag-strong">JavaScript / TypeScript</span>
             <span class="tag tag-strong">HTML / CSS</span>
+            <span class="tag tag-strong">Python</span>
             <span class="tag tag-mid">C++</span>
             <span class="tag tag-mid">SQL</span>
             <span class="tag tag-mid">Bash / Shell</span>
             <span class="tag">Java</span>
-            <span class="tag">Python</span>
             <span class="tag">MIPS Assembly</span>
             <span class="tag">PowerShell</span>
           </div>
@@ -191,8 +195,8 @@
             <h3 class="project-name">JojeCo Home Lab</h3>
             <span class="badge badge-active">Active</span>
           </div>
-          <p class="project-desc">72+ Docker containers across 6 machines with zero cloud dependency. Full architecture from scratch: networking, containerization, DNS, monitoring, and AI integration. Cloudflare Tunnels for external access.</p>
-          <p class="project-services">Services include LibreChat, LiteLLM, Authelia SSO, Nextcloud, Immich, Grafana, Prometheus, n8n, Gitea, ComfyUI, Navidrome, Plex, Loki, and more.</p>
+          <p class="project-desc">80+ Docker containers across 5 machines, designed and operated from scratch. Proxmox hypervisor with LXC containers and VMs, Cloudflare Tunnels + Nginx Proxy Manager for zero-trust external access, Authelia SSO, and a full observability stack (Grafana, Prometheus, Loki, Uptime Kuma). Completely self-hosted — no cloud dependency for any core service.</p>
+          <p class="project-services">Running: Plex, Nextcloud, Immich, Navidrome, Sonarr/Radarr, n8n automation, Gitea + CI runners, Overseerr, ComfyUI, and 20+ more production services — all accessible via custom domains with SSL.</p>
           <div class="project-tags">
             <span class="ptag">Docker</span>
             <span class="ptag">Proxmox</span>
@@ -200,21 +204,25 @@
             <span class="ptag">Cloudflare</span>
             <span class="ptag">Prometheus</span>
             <span class="ptag">Grafana</span>
+            <span class="ptag">Loki</span>
+            <span class="ptag">Authelia SSO</span>
           </div>
         </article>
 
         <article class="project-card project-featured">
           <div class="project-header">
-            <h3 class="project-name">AI Orchestration System</h3>
+            <h3 class="project-name">AI Orchestration System (JoBot)</h3>
             <span class="badge badge-active">Active</span>
           </div>
-          <p class="project-desc">Three-tier LLM routing system: human direction via Discord to Claude Code agent, which delegates to local models (Qwen, DeepSeek) via LiteLLM, with cloud APIs gated behind phone approval. Free by default, cloud as exception.</p>
+          <p class="project-desc">Three-tier autonomous AI agent managing the entire home lab. A Claude Code agent (JoBot) acts as project lead: receives direction via Discord, breaks tasks into subtasks, and delegates to a fleet of local LLMs (Qwen 2.5, DeepSeek-R1) via LiteLLM with model routing by task type (code gen, reasoning, vision). Cloud APIs are gated behind a phone-approval workflow. Also built a custom MCP server exposing SSH execution, Prometheus queries, and n8n triggers to the agent. Running 26 self-hosted models with zero recurring AI spend.</p>
           <div class="project-tags">
             <span class="ptag">Claude Code</span>
             <span class="ptag">LiteLLM</span>
             <span class="ptag">Ollama</span>
-            <span class="ptag">Discord</span>
-            <span class="ptag">MCP</span>
+            <span class="ptag">Discord Bot</span>
+            <span class="ptag">MCP Protocol</span>
+            <span class="ptag">Anthropic API</span>
+            <span class="ptag">FastAPI</span>
           </div>
         </article>
 
@@ -268,12 +276,13 @@
             <h3 class="project-name">JojeCo Ops Dashboard</h3>
             <span class="badge badge-active">Active</span>
           </div>
-          <p class="project-desc">Real-time service health monitoring for the home lab. Kiosk mode, weather widget, Uptime Kuma integration, GitHub activity feed, and server control panels.</p>
+          <p class="project-desc">Custom React control panel for the home lab. Real-time service health polling, server power management (WoL/shutdown), container start/stop/restart, kiosk mode for wall display, Uptime Kuma integration, GitHub activity feed, and an AI orchestration status panel. Built with Vite + Tailwind + shadcn/ui. <a href="https://dash.jojeco.ca" target="_blank" rel="noopener" class="project-link">Live demo &rarr;</a></p>
           <div class="project-tags">
             <span class="ptag">React</span>
             <span class="ptag">TypeScript</span>
             <span class="ptag">Vite</span>
             <span class="ptag">Tailwind</span>
+            <span class="ptag">shadcn/ui</span>
             <span class="ptag">Firebase Auth</span>
           </div>
         </article>
@@ -416,19 +425,27 @@
   <section class="section section-alt" id="contact">
     <div class="container">
       <h2 class="section-title">Contact</h2>
-      <p class="contact-text">Interested in working together or want to talk shop? Reach out.</p>
+      <p class="contact-text">Seeking summer 2026 internships and part-time roles — software development, fullstack/React, or IT/infrastructure. Based in Lethbridge, AB. Open to remote.</p>
       <div class="contact-links">
         <a href="https://github.com/jojeco" target="_blank" rel="noopener" class="contact-link">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           <span>github.com/jojeco</span>
         </a>
-        <a href="mailto:jordan@jojeco.ca" class="contact-link">
+        <a href="mailto:jojeco717@gmail.com" class="contact-link">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          <span>jordan@jojeco.ca</span>
+          <span>jojeco717@gmail.com</span>
         </a>
         <a href="https://www.linkedin.com/in/jordan-coombera906a1b9/" target="_blank" rel="noopener" class="contact-link">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
           <span>LinkedIn</span>
+        </a>
+        <a href="Resume (IT Seminar).pdf" target="_blank" rel="noopener" class="contact-link">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Resume (PDF)</span>
+        </a>
+        <a href="https://dash.jojeco.ca" target="_blank" rel="noopener" class="contact-link">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Live Dashboard</span>
         </a>
       </div>
     </div>
