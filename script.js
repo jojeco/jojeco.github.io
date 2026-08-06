@@ -69,4 +69,26 @@
     });
   });
 
+  // --- Active nav link highlighting via IntersectionObserver ---
+  var navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+  var allSections = document.querySelectorAll('section[id]');
+
+  if ('IntersectionObserver' in window && allSections.length && navAnchors.length) {
+    var sectionObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var id = entry.target.id;
+          navAnchors.forEach(function (a) {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    }, {
+      threshold: 0,
+      rootMargin: '-64px 0px -55% 0px'
+    });
+
+    allSections.forEach(function (s) { sectionObserver.observe(s); });
+  }
+
 })();
