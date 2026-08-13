@@ -69,4 +69,55 @@
     });
   });
 
+  // --- Scroll-spy: active nav highlighting ---
+  var sections = document.querySelectorAll('section[id]');
+  var navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+
+  if (sections.length && navAnchors.length) {
+    var spyObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var id = entry.target.getAttribute('id');
+          navAnchors.forEach(function (a) {
+            a.classList.remove('active');
+            if (a.getAttribute('href') === '#' + id) {
+              a.classList.add('active');
+            }
+          });
+        }
+      });
+    }, {
+      rootMargin: '-20% 0px -60% 0px',
+      threshold: 0.30
+    });
+
+    sections.forEach(function (section) {
+      spyObserver.observe(section);
+    });
+  }
+
+  // --- Typewriter animation on hero tagline ---
+  var tagline = document.querySelector('.hero-tagline');
+  if (tagline) {
+    var fullText = 'CS student. Systems builder. Ships real things.';
+    tagline.textContent = '';
+
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.textContent = '|';
+    tagline.appendChild(cursor);
+
+    var charIndex = 0;
+    function typeChar() {
+      if (charIndex < fullText.length) {
+        tagline.insertBefore(document.createTextNode(fullText.charAt(charIndex)), cursor);
+        charIndex++;
+        setTimeout(typeChar, 55);
+      } else {
+        cursor.remove();
+      }
+    }
+    setTimeout(typeChar, 300);
+  }
+
 })();
