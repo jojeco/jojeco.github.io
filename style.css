@@ -801,3 +801,19 @@ img {
     justify-content: center;
   }
 }
+
+/* --- Nav scroll-spy active state --- */
+.nav-links a.active {
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+/* --- Typewriter cursor --- */
+.cursor {
+  animation: blink 0.7s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
