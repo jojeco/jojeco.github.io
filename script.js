@@ -61,7 +61,11 @@
   // --- Smooth scroll for nav links (fallback for browsers without native support) ---
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
-      var target = document.querySelector(this.getAttribute('href'));
+      var href = this.getAttribute('href');
+      // A bare "#" (e.g. the nav logo) is not a valid selector and
+      // throws in document.querySelector — skip it.
+      if (!href || href === '#') return;
+      var target = document.querySelector(href);
       if (target) {
         e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth' });
@@ -89,6 +93,50 @@
     });
 
     allSections.forEach(function (s) { sectionObserver.observe(s); });
+  }
+
+  // --- Project category filter ---
+  var filterChips = document.querySelectorAll('.filter-chip');
+  var projectCards = document.querySelectorAll('.project-card');
+  var filterCount = document.querySelector('.filter-count');
+
+  function setCount(n) {
+    if (filterCount) {
+      filterCount.textContent = 'Showing ' + n + ' of ' + projectCards.length;
+    }
+  }
+
+  function applyFilter(filter) {
+    var visible = 0;
+    projectCards.forEach(function (card) {
+      var tags = (card.getAttribute('data-tags') || '').split(' ');
+      var matches = filter === 'all' || tags.indexOf(filter) !== -1;
+      card.style.display = matches ? '' : 'none';
+      if (matches) {
+        visible++;
+        // A card re-shown after being filtered out may never have
+        // crossed the scroll fade-in threshold while display:none
+        // (getBoundingClientRect is zeroed for hidden elements), so
+        // force it fully opaque instead of leaving it stuck at opacity 0.
+        card.classList.add('visible');
+      }
+    });
+    setCount(visible);
+  }
+
+  if (filterChips.length && projectCards.length) {
+    setCount(projectCards.length);
+    filterChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        filterChips.forEach(function (c) {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
+        chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
+        applyFilter(chip.getAttribute('data-filter'));
+      });
+    });
   }
 
 })();

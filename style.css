@@ -432,6 +432,45 @@ img {
   border-color: rgba(63, 185, 80, 0.3);
 }
 
+/* --- Project Filters --- */
+.project-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-chip {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.filter-chip:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.filter-chip.active {
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--accent);
+  border-color: rgba(88, 166, 255, 0.35);
+}
+
+.filter-count {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+
 /* --- Projects --- */
 .projects-grid {
   display: grid;
@@ -804,5 +843,10 @@ img {
 
   .contact-link {
     justify-content: center;
+  }
+
+  .filter-chip {
+    padding: 6px 14px;
+    font-size: 0.8rem;
   }
 }

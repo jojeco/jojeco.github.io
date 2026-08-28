@@ -188,9 +188,17 @@
   <section class="section" id="projects">
     <div class="container">
       <h2 class="section-title">Projects</h2>
+      <div class="project-filters" role="group" aria-label="Filter projects by category">
+        <button type="button" class="filter-chip active" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="filter-chip" data-filter="infrastructure" aria-pressed="false">Infrastructure</button>
+        <button type="button" class="filter-chip" data-filter="ai" aria-pressed="false">AI</button>
+        <button type="button" class="filter-chip" data-filter="full-stack" aria-pressed="false">Full-Stack</button>
+        <button type="button" class="filter-chip" data-filter="web" aria-pressed="false">Web</button>
+      </div>
+      <p class="filter-count" aria-live="polite">Showing 12 of 12</p>
       <div class="projects-grid">
 
-        <article class="project-card project-featured">
+        <article class="project-card project-featured" data-tags="infrastructure">
           <div class="project-header">
             <h3 class="project-name">JojeCo Home Lab</h3>
             <span class="badge badge-active">Active</span>
@@ -209,7 +217,7 @@
           </div>
         </article>
 
-        <article class="project-card project-featured">
+        <article class="project-card project-featured" data-tags="ai infrastructure">
           <div class="project-header">
             <h3 class="project-name">AI Orchestration System (JoBot)</h3>
             <span class="badge badge-active">Active</span>
@@ -225,7 +233,7 @@
             <span class="ptag">FastAPI</span>
           </div>
         </article>
-        <article class="project-card">
+        <article class="project-card" data-tags="ai full-stack">
           <div class="project-header">
             <h3 class="project-name">LLM Playground</h3>
             <span class="badge badge-active">Active</span>
@@ -244,7 +252,7 @@
         </article>
 
 
-        <article class="project-card">
+        <article class="project-card" data-tags="full-stack">
           <div class="project-header">
             <h3 class="project-name">Job Opportunity Agent</h3>
             <span class="badge badge-active">Active</span>
@@ -259,7 +267,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="full-stack web">
           <div class="project-header">
             <h3 class="project-name">Full-Stack Kanban System</h3>
             <span class="badge badge-complete">Complete</span>
@@ -275,7 +283,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="ai full-stack">
           <div class="project-header">
             <h3 class="project-name">One Piece TCG Scanner</h3>
             <span class="badge badge-design">In Design</span>
@@ -289,7 +297,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="full-stack web">
           <div class="project-header">
             <h3 class="project-name">JojeCo Ops Dashboard</h3>
             <span class="badge badge-active">Active</span>
@@ -305,7 +313,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="full-stack web">
           <div class="project-header">
             <h3 class="project-name">Scheduling System</h3>
             <span class="badge badge-complete">Complete</span>
@@ -320,7 +328,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="web">
           <div class="project-header">
             <h3 class="project-name">3D Printing Business Site</h3>
             <span class="badge badge-complete">Complete</span>
@@ -333,7 +341,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="infrastructure ai">
           <div class="project-header">
             <h3 class="project-name">JojeCo MCP Server</h3>
             <span class="badge badge-active">Active</span>
@@ -346,7 +354,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="infrastructure">
           <div class="project-header">
             <h3 class="project-name">Home Network Redesign</h3>
             <span class="badge badge-complete">Complete</span>
@@ -359,7 +367,7 @@
           </div>
         </article>
 
-        <article class="project-card">
+        <article class="project-card" data-tags="infrastructure">
           <div class="project-header">
             <h3 class="project-name">CD Ripping Pipeline</h3>
             <span class="badge badge-complete">Complete</span>
