@@ -464,11 +464,31 @@ img {
   border-color: rgba(88, 166, 255, 0.35);
 }
 
+.filter-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .filter-count {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   color: var(--text-dim);
   margin-bottom: 24px;
+}
+
+.projects-empty {
+  display: none;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  padding: 40px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.projects-empty:not([hidden]) {
+  display: block;
 }
 
 /* --- Projects --- */

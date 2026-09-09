@@ -96,9 +96,22 @@
   }
 
   // --- Project category filter ---
+  // Shareable + persistent: the selected category lives in the URL hash
+  // (#projects or #projects?filter=x), falls back to localStorage when
+  // there's no hash, and stays in sync with browser Back/Forward.
   var filterChips = document.querySelectorAll('.filter-chip');
   var projectCards = document.querySelectorAll('.project-card');
   var filterCount = document.querySelector('.filter-count');
+  var emptyState = document.querySelector('.projects-empty');
+  var FILTER_STORAGE_KEY = 'jc-project-filter';
+
+  var VALID_FILTERS = Array.prototype.map.call(filterChips, function (chip) {
+    return chip.getAttribute('data-filter');
+  });
+
+  function isValidFilter(filter) {
+    return VALID_FILTERS.indexOf(filter) !== -1;
+  }
 
   function setCount(n) {
     if (filterCount) {
@@ -122,20 +135,124 @@
       }
     });
     setCount(visible);
+    if (emptyState) {
+      emptyState.hidden = visible !== 0;
+    }
+  }
+
+  function setActiveChip(filter) {
+    filterChips.forEach(function (chip) {
+      var isActive = chip.getAttribute('data-filter') === filter;
+      chip.classList.toggle('active', isActive);
+      chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function readStoredFilter() {
+    try {
+      return window.localStorage.getItem(FILTER_STORAGE_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeStoredFilter(filter) {
+    try {
+      window.localStorage.setItem(FILTER_STORAGE_KEY, filter);
+    } catch (e) {
+      // Storage may be unavailable (e.g. private-mode Safari) — ignore.
+    }
+  }
+
+  // Hash format is "#projects" (all) or "#projects?filter=x". Returns
+  // null when the hash isn't about the projects filter at all, so the
+  // caller knows to fall back to localStorage instead.
+  function parseHashFilter() {
+    var hash = window.location.hash || '';
+    if (hash.indexOf('#projects') !== 0) {
+      return null;
+    }
+    var match = hash.match(/[?&]filter=([^&]+)/);
+    if (!match) {
+      return 'all';
+    }
+    try {
+      return decodeURIComponent(match[1]);
+    } catch (e) {
+      return 'all';
+    }
+  }
+
+  function readFilter() {
+    var fromHash = parseHashFilter();
+    if (fromHash !== null) {
+      return isValidFilter(fromHash) ? fromHash : 'all';
+    }
+    var fromStorage = readStoredFilter();
+    if (fromStorage !== null && isValidFilter(fromStorage)) {
+      return fromStorage;
+    }
+    return 'all';
+  }
+
+  function selectFilter(filter, pushHash) {
+    if (!isValidFilter(filter)) {
+      filter = 'all';
+    }
+    applyFilter(filter);
+    setActiveChip(filter);
+    writeStoredFilter(filter);
+    if (pushHash) {
+      var newHash = filter === 'all' ? '#projects' : '#projects?filter=' + encodeURIComponent(filter);
+      if (window.location.hash !== newHash) {
+        window.location.hash = newHash;
+      }
+    }
   }
 
   if (filterChips.length && projectCards.length) {
-    setCount(projectCards.length);
-    filterChips.forEach(function (chip) {
+    var initialFilter = readFilter();
+    applyFilter(initialFilter);
+    setActiveChip(initialFilter);
+    // Only remember the choice locally on load — don't force a hash
+    // push if one wasn't already present in the URL.
+    writeStoredFilter(initialFilter);
+
+    filterChips.forEach(function (chip, index) {
       chip.addEventListener('click', function () {
-        filterChips.forEach(function (c) {
-          c.classList.remove('active');
-          c.setAttribute('aria-pressed', 'false');
-        });
-        chip.classList.add('active');
-        chip.setAttribute('aria-pressed', 'true');
-        applyFilter(chip.getAttribute('data-filter'));
+        selectFilter(chip.getAttribute('data-filter'), true);
       });
+
+      // Left/Right arrow roving focus across the chip group;
+      // Home/End jump to the first/last chip.
+      chip.addEventListener('keydown', function (e) {
+        var nextIndex = null;
+        if (e.key === 'ArrowRight') {
+          nextIndex = (index + 1) % filterChips.length;
+        } else if (e.key === 'ArrowLeft') {
+          nextIndex = (index - 1 + filterChips.length) % filterChips.length;
+        } else if (e.key === 'Home') {
+          nextIndex = 0;
+        } else if (e.key === 'End') {
+          nextIndex = filterChips.length - 1;
+        }
+        if (nextIndex !== null) {
+          e.preventDefault();
+          filterChips[nextIndex].focus();
+        }
+      });
+    });
+
+    // Browser Back/Forward changes the hash without a click — re-read
+    // it and re-apply, but never push a hash from here (no push loop).
+    window.addEventListener('hashchange', function () {
+      var hash = window.location.hash || '';
+      if (hash !== '' && hash.indexOf('#projects') !== 0) {
+        return;
+      }
+      var filter = readFilter();
+      applyFilter(filter);
+      setActiveChip(filter);
     });
   }
 
