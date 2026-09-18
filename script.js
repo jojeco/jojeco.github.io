@@ -9,19 +9,33 @@
   const navToggle = document.getElementById('nav-toggle');
   const navLinks = document.getElementById('nav-links');
 
+  // Single owner of the open/active classes and aria-expanded so every
+  // open/close path (toggle, link click, Escape) stays in sync.
+  function setNavOpen(open) {
+    navLinks.classList.toggle('open', open);
+    // Animate hamburger
+    navToggle.classList.toggle('active', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', function () {
-      navLinks.classList.toggle('open');
-      // Animate hamburger
-      navToggle.classList.toggle('active');
+      setNavOpen(!navLinks.classList.contains('open'));
     });
 
     // Close mobile nav when a link is clicked
     navLinks.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function () {
-        navLinks.classList.remove('open');
-        navToggle.classList.remove('active');
+        setNavOpen(false);
       });
+    });
+
+    // Escape closes an open menu and returns focus to the toggle
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+        setNavOpen(false);
+        navToggle.focus();
+      }
     });
   }
 
@@ -59,6 +73,9 @@
   window.addEventListener('scroll', updateNav, { passive: true });
 
   // --- Smooth scroll for nav links (fallback for browsers without native support) ---
+  // Respect the OS "reduce motion" setting: jump instead of animating.
+  var reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
       var href = this.getAttribute('href');
@@ -68,7 +85,13 @@
       var target = document.querySelector(href);
       if (target) {
         e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
+        target.scrollIntoView({ behavior: reduceMotionQuery.matches ? 'auto' : 'smooth' });
+        // preventDefault() skips the browser's own focus transfer, so
+        // move focus to the target (skip link, keyboard nav) ourselves.
+        if (!target.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) {
+          target.setAttribute('tabindex', '-1');
+        }
+        target.focus({ preventScroll: true });
       }
     });
   });

@@ -1,7 +1,9 @@
 # Next increments for jojeco.github.io
 
 - [x] ~~**Persist the project filter selection**~~ — the selected category now lives in the URL hash (`#projects?filter=ai`), falls back to localStorage when there's no hash, stays in sync with Back/Forward, and the chip group has an empty state plus Left/Right/Home/End keyboard navigation.
-- **Update contact section copy** — "Seeking summer 2026 internships and part-time roles..." (index.html, contact section) is stale; update to reflect fall 2026 / early 2027 availability and the May 2027 graduation timeline.
-- **Add GitHub links to more project cards** — only "LLM Playground" has a `.project-links` block. "Scheduling System" and "Full-Stack Kanban System" read as complete but have no GitHub or live-demo links; add `<div class="project-links">` wherever a repo exists.
+- [x] ~~**Keyboard & motion accessibility pass**~~ — added a "Skip to content" link, `aria-expanded`/`aria-controls` on the mobile nav toggle (all open/close paths go through `setNavOpen`, plus Escape-to-close with focus restored), focus transfer after smooth-scroll, an accent `:focus-visible` outline on links/buttons/contact links, and a `prefers-reduced-motion` mode that disables animations/transitions and uses instant scrolling.
+- **Update contact section copy** — "Seeking summer 2026 internships and part-time roles..." (index.html, contact section) is stale; update to reflect fall 2026 / early 2027 availability and the May 2027 graduation timeline. Needs Jordan's real availability dates first — don't invent them.
+- **Add GitHub links to more project cards** — only "LLM Playground" has a `.project-links` block. "Scheduling System" and "Full-Stack Kanban System" read as complete but have no GitHub or live-demo links; add `<div class="project-links">` wherever a repo exists. Needs confirmed repo URLs first.
 - **Remove unused prism.css / prism.js** — neither file is referenced anywhere in index.html; safe to delete.
 - **Add Open Graph meta tags** — no `og:` tags in `<head>` yet. Add `og:title`, `og:description`, and `og:image` for richer link previews when the portfolio URL is shared on LinkedIn or Discord.
+- **Add a back-to-top button** — a small fixed button that appears after scrolling past the hero and returns to `#main`/top; must respect `prefers-reduced-motion` and be keyboard-focusable.

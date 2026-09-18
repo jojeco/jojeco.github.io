@@ -36,6 +36,41 @@ html {
   scroll-padding-top: 80px;
 }
 
+/* --- Accessibility: skip link + focus --- */
+.skip-link {
+  /* Fixed, and above .nav's z-index:1000 — the focused link lands at
+     top:8px, inside the 64px-tall fixed navbar, and would otherwise be
+     painted behind its opaque blurred background. */
+  position: fixed;
+  top: 8px;
+  left: -9999px;
+  z-index: 1100;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 8px;
+}
+
+a:focus-visible,
+.btn:focus-visible,
+.nav-toggle:focus-visible,
+.contact-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Programmatic focus targets (skip link, in-page nav) shouldn't show a ring */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);
@@ -868,5 +903,35 @@ img {
   .filter-chip {
     padding: 6px 14px;
     font-size: 0.8rem;
+  }
+}
+
+/* ============================================
+   Reduced motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Hero children start at opacity 0 and rely on the animation to appear */
+  .hero-content > *,
+  .fade-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .project-card:hover,
+  .contact-link:hover {
+    transform: none;
   }
 }
