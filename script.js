@@ -63,14 +63,91 @@
   // --- Navbar background on scroll ---
   var nav = document.getElementById('nav');
   function updateNav() {
-    if (window.scrollY > 50) {
-      nav.style.background = 'rgba(13, 17, 23, 0.95)';
-    } else {
-      nav.style.background = 'rgba(13, 17, 23, 0.85)';
-    }
+    nav.classList.toggle('scrolled', window.scrollY > 50);
   }
   updateNav();
   window.addEventListener('scroll', updateNav, { passive: true });
+
+  // --- Theme (light/dark) ---
+  // The inline <head> script has already resolved and applied data-theme.
+  // 'jc-theme' stores only an explicit user choice; with nothing stored the
+  // theme follows the system preference.
+  var THEME_STORAGE_KEY = 'jc-theme';
+  var themeToggle = document.getElementById('theme-toggle');
+  var themeQuery = null;
+  try {
+    themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  } catch (e) {}
+
+  function readStoredTheme() {
+    try {
+      var stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      return stored === 'light' || stored === 'dark' ? stored : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeStoredTheme(theme) {
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (e) {
+      // Storage may be unavailable (e.g. private-mode Safari) — the choice
+      // still applies for this page view.
+    }
+  }
+
+  // Mirrors the head script: light only when the system explicitly asks for it.
+  function systemTheme() {
+    try {
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  }
+
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (themeToggle) {
+      var label = theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+      themeToggle.setAttribute('aria-label', label);
+      themeToggle.setAttribute('title', label);
+    }
+  }
+
+  function setTheme(theme) {
+    applyTheme(theme);
+    writeStoredTheme(theme);
+  }
+
+  // Re-resolve once so the button label matches the applied theme even if
+  // the head script did not run.
+  applyTheme(readStoredTheme() || systemTheme());
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function () {
+      setTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    });
+  }
+
+  // Follow live system changes only while there is no explicit override.
+  function onSystemThemeChange() {
+    if (readStoredTheme() === null) {
+      applyTheme(systemTheme());
+    }
+  }
+
+  if (themeQuery) {
+    if (typeof themeQuery.addEventListener === 'function') {
+      themeQuery.addEventListener('change', onSystemThemeChange);
+    } else if (typeof themeQuery.addListener === 'function') {
+      themeQuery.addListener(onSystemThemeChange);
+    }
+  }
 
   // --- Smooth scroll for nav links (fallback for browsers without native support) ---
   // Respect the OS "reduce motion" setting: jump instead of animating.

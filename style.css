@@ -24,11 +24,18 @@
   --green-dim: #238636;
   --orange: #d29922;
   --purple: #bc8cff;
+  --on-accent: #0d1117;
+  --overlay-hover: rgba(255, 255, 255, 0.06);
+  --overlay-hover-soft: rgba(255, 255, 255, 0.04);
+  --nav-bg: rgba(13, 17, 23, 0.85);
+  --nav-bg-scrolled: rgba(13, 17, 23, 0.95);
+  --nav-bg-mobile: rgba(13, 17, 23, 0.97);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   --max-width: 1100px;
   --radius: 8px;
   --transition: 0.2s ease;
+  color-scheme: dark;
 }
 
 html {
@@ -61,6 +68,7 @@ html {
 a:focus-visible,
 .btn:focus-visible,
 .nav-toggle:focus-visible,
+.theme-toggle:focus-visible,
 .contact-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -82,7 +90,7 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }
 
 img {
@@ -104,11 +112,15 @@ img {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(13, 17, 23, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   transition: background var(--transition);
+}
+
+.nav.scrolled {
+  background: var(--nav-bg-scrolled);
 }
 
 .nav-inner {
@@ -138,6 +150,7 @@ img {
   display: flex;
   list-style: none;
   gap: 8px;
+  margin-left: auto;
 }
 
 .nav-links a {
@@ -152,12 +165,46 @@ img {
 
 .nav-links a:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-hover);
 }
 
 .nav-links a.active {
   color: var(--accent);
   background: rgba(88, 166, 255, 0.08);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  background: var(--overlay-hover);
+}
+
+/* Dark theme shows the sun (switch to light); light theme shows the moon */
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-sun {
+  display: none;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-moon {
+  display: block;
 }
 
 .nav-toggle {
@@ -258,7 +305,7 @@ img {
 
 .btn-primary {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }
 
 .btn-primary:hover {
@@ -275,7 +322,7 @@ img {
 
 .btn-secondary:hover {
   border-color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover-soft);
   transform: translateY(-1px);
 }
 
@@ -839,7 +886,7 @@ img {
     top: 64px;
     left: 0;
     right: 0;
-    background: rgba(13, 17, 23, 0.97);
+    background: var(--nav-bg-mobile);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
@@ -857,8 +904,13 @@ img {
     font-size: 1rem;
   }
 
+  .theme-toggle {
+    margin-left: auto;
+  }
+
   .nav-toggle {
     display: flex;
+    margin-left: 4px;
   }
 
   .hero {
@@ -904,6 +956,61 @@ img {
     padding: 6px 14px;
     font-size: 0.8rem;
   }
+}
+
+/* ============================================
+   Light theme
+   ============================================ */
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-alt: #f6f8fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f6f8fa;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --text-muted: #59636e;
+  --text-dim: #6e7781;
+  --accent: #0969da;
+  --accent-bright: #0550ae;
+  --green: #1a7f37;
+  --green-dim: #1a7f37;
+  --orange: #7d4e00;
+  --purple: #8250df;
+  --on-accent: #ffffff;
+  --overlay-hover: rgba(0, 0, 0, 0.05);
+  --overlay-hover-soft: rgba(0, 0, 0, 0.03);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-bg-scrolled: rgba(255, 255, 255, 0.95);
+  --nav-bg-mobile: rgba(255, 255, 255, 0.97);
+  color-scheme: light;
+}
+
+/* Tinted fills and grid lines are tuned for a dark background; retint them
+   from the darker light-theme accent so they stay visible on white. */
+:root[data-theme="light"] .hero-grid {
+  background-image:
+    linear-gradient(rgba(9, 105, 218, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(9, 105, 218, 0.06) 1px, transparent 1px);
+}
+
+:root[data-theme="light"] .ptag {
+  background: rgba(89, 99, 110, 0.1);
+  color: var(--text-muted);
+}
+
+/* Lighten the badge fills so the darker light-theme text still clears 4.5:1 */
+:root[data-theme="light"] .badge-active {
+  background: rgba(26, 127, 55, 0.08);
+  border-color: rgba(26, 127, 55, 0.25);
+}
+
+:root[data-theme="light"] .badge-design {
+  background: rgba(154, 103, 0, 0.07);
+  border-color: rgba(154, 103, 0, 0.25);
+}
+
+:root[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
 }
 
 /* ============================================
