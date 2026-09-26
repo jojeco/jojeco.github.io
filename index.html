@@ -225,6 +225,14 @@
         <button type="button" class="filter-chip" data-filter="full-stack" aria-pressed="false">Full-Stack</button>
         <button type="button" class="filter-chip" data-filter="web" aria-pressed="false">Web</button>
       </div>
+      <div class="project-search" id="project-search-wrap" hidden>
+        <div class="project-search-row">
+          <input type="text" id="project-search" class="project-search-input" list="project-tech-list" aria-label="Search projects by name or technology" autocomplete="off" spellcheck="false" placeholder="Search by name or technology…">
+          <button type="button" class="project-search-clear" id="project-search-clear" aria-label="Clear search" hidden>&times;</button>
+        </div>
+        <datalist id="project-tech-list"></datalist>
+        <p class="project-search-hint">Press <span class="project-search-key">/</span> to search</p>
+      </div>
       <p class="filter-count" aria-live="polite">Showing 12 of 12</p>
       <div class="projects-grid">
 
@@ -411,7 +419,11 @@
         </article>
 
       </div>
-      <p class="projects-empty" hidden>No projects match this filter yet. Try a different category.</p>
+      <p class="projects-empty" hidden>
+        No projects match this filter yet. Try a different category.
+        <br>
+        <button type="button" class="projects-empty-clear" id="projects-empty-clear">Clear filters</button>
+      </p>
     </div>
   </section>
 

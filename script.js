@@ -195,19 +195,34 @@
     allSections.forEach(function (s) { sectionObserver.observe(s); });
   }
 
-  // --- Project category filter ---
-  // Shareable + persistent: the selected category lives in the URL hash
-  // (#projects or #projects?filter=x), falls back to localStorage when
-  // there's no hash, and stays in sync with browser Back/Forward.
+  // --- Project category filter + search ---
+  // Shareable + persistent: the selected category and search query live in
+  // the URL hash (#projects, #projects?filter=x, #projects?q=y, or both),
+  // the category falls back to localStorage when there's no hash, and both
+  // stay in sync with browser Back/Forward. readState()/buildHash() are the
+  // single source of truth for that hash — every entry point (chip clicks,
+  // search input, the two Clear buttons, hashchange) goes through them.
   var filterChips = document.querySelectorAll('.filter-chip');
   var projectCards = document.querySelectorAll('.project-card');
   var filterCount = document.querySelector('.filter-count');
   var emptyState = document.querySelector('.projects-empty');
+  var emptyClearBtn = document.getElementById('projects-empty-clear');
+  var searchWrap = document.getElementById('project-search-wrap');
+  var searchInput = document.getElementById('project-search');
+  var searchClearBtn = document.getElementById('project-search-clear');
+  var techDatalist = document.getElementById('project-tech-list');
   var FILTER_STORAGE_KEY = 'jc-project-filter';
+  var SEARCH_DEBOUNCE_MS = 250;
 
   var VALID_FILTERS = Array.prototype.map.call(filterChips, function (chip) {
     return chip.getAttribute('data-filter');
   });
+
+  // Tracks the active category between hash writes; the query itself is
+  // read straight from the input (its own source of truth) rather than
+  // mirrored into a second variable.
+  var currentFilterValue = 'all';
+  var searchDebounceTimer = null;
 
   function isValidFilter(filter) {
     return VALID_FILTERS.indexOf(filter) !== -1;
@@ -219,11 +234,18 @@
     }
   }
 
-  function applyFilter(filter) {
+  // Generalised filter: combines the category (AND) with a case-insensitive,
+  // trimmed text match against each card's name, description and ptags.
+  // The only place that sets card.style.display, adds .visible, calls
+  // setCount and toggles the empty state.
+  function applyFilter(filter, q) {
+    var query = (q || '').trim().toLowerCase();
     var visible = 0;
     projectCards.forEach(function (card) {
       var tags = (card.getAttribute('data-tags') || '').split(' ');
-      var matches = filter === 'all' || tags.indexOf(filter) !== -1;
+      var categoryMatches = filter === 'all' || tags.indexOf(filter) !== -1;
+      var textMatches = query === '' || (card._searchHaystack || '').indexOf(query) !== -1;
+      var matches = categoryMatches && textMatches;
       card.style.display = matches ? '' : 'none';
       if (matches) {
         visible++;
@@ -233,6 +255,10 @@
         // force it fully opaque instead of leaving it stuck at opacity 0.
         card.classList.add('visible');
       }
+      (card._ptagEls || []).forEach(function (ptagEl) {
+        var isTagMatch = query !== '' && ptagEl.textContent.trim().toLowerCase().indexOf(query) !== -1;
+        ptagEl.classList.toggle('ptag-match', isTagMatch);
+      });
     });
     setCount(visible);
     if (emptyState) {
@@ -264,59 +290,205 @@
     }
   }
 
-  // Hash format is "#projects" (all) or "#projects?filter=x". Returns
-  // null when the hash isn't about the projects filter at all, so the
-  // caller knows to fall back to localStorage instead.
-  function parseHashFilter() {
+  // Single reader for the combined state. Hash format is "#projects",
+  // "#projects?filter=x", "#projects?q=y" or "#projects?filter=x&q=y". The
+  // query lives in the hash only (never localStorage); the category falls
+  // back to localStorage when there's no #projects hash at all.
+  function readState() {
     var hash = window.location.hash || '';
-    if (hash.indexOf('#projects') !== 0) {
-      return null;
+    var filter = 'all';
+    var q = '';
+    if (hash.indexOf('#projects') === 0) {
+      var filterMatch = hash.match(/[?&]filter=([^&]+)/);
+      if (filterMatch) {
+        try {
+          filter = decodeURIComponent(filterMatch[1]);
+        } catch (e) {
+          filter = 'all';
+        }
+      }
+      var qMatch = hash.match(/[?&]q=([^&]+)/);
+      if (qMatch) {
+        try {
+          q = decodeURIComponent(qMatch[1]);
+        } catch (e) {
+          q = '';
+        }
+      }
+      if (!isValidFilter(filter)) {
+        filter = 'all';
+      }
+    } else {
+      var fromStorage = readStoredFilter();
+      if (fromStorage !== null && isValidFilter(fromStorage)) {
+        filter = fromStorage;
+      }
     }
-    var match = hash.match(/[?&]filter=([^&]+)/);
-    if (!match) {
-      return 'all';
+    return { filter: filter, q: q };
+  }
+
+  // Single writer for the combined state — every hash the app ever
+  // produces (chip click, debounced search, Clear buttons) is built here.
+  function buildHash(state) {
+    var filter = isValidFilter(state.filter) ? state.filter : 'all';
+    var q = state.q || '';
+    var params = [];
+    if (filter !== 'all') {
+      params.push('filter=' + encodeURIComponent(filter));
     }
-    try {
-      return decodeURIComponent(match[1]);
-    } catch (e) {
-      return 'all';
+    if (q !== '') {
+      params.push('q=' + encodeURIComponent(q));
+    }
+    return params.length ? '#projects?' + params.join('&') : '#projects';
+  }
+
+  function currentQuery() {
+    return searchInput ? searchInput.value : '';
+  }
+
+  function syncClearButton() {
+    if (searchClearBtn && searchInput) {
+      searchClearBtn.hidden = searchInput.value.length === 0;
     }
   }
 
-  function readFilter() {
-    var fromHash = parseHashFilter();
-    if (fromHash !== null) {
-      return isValidFilter(fromHash) ? fromHash : 'all';
+  // Applies the current filter+query and writes the URL via replaceState —
+  // adds no history entry and does not fire hashchange. Used by the
+  // debounced search commit and by the two Clear buttons (immediately,
+  // no debounce, since they aren't keystrokes).
+  function applyAndSyncURL() {
+    var q = currentQuery();
+    applyFilter(currentFilterValue, q);
+    var newHash = buildHash({ filter: currentFilterValue, q: q });
+    if (window.location.hash !== newHash) {
+      history.replaceState(null, '', newHash);
     }
-    var fromStorage = readStoredFilter();
-    if (fromStorage !== null && isValidFilter(fromStorage)) {
-      return fromStorage;
-    }
-    return 'all';
   }
 
+  // Chip clicks (and the empty-state Clear button) keep assigning
+  // location.hash, as before — that's the one path allowed to push a
+  // real history entry. Refactored to carry the current query along
+  // instead of dropping it.
   function selectFilter(filter, pushHash) {
     if (!isValidFilter(filter)) {
       filter = 'all';
     }
-    applyFilter(filter);
+    // A pending debounced keystroke must not clobber this discrete action.
+    clearTimeout(searchDebounceTimer);
+    currentFilterValue = filter;
+    var q = currentQuery();
+    applyFilter(filter, q);
     setActiveChip(filter);
     writeStoredFilter(filter);
     if (pushHash) {
-      var newHash = filter === 'all' ? '#projects' : '#projects?filter=' + encodeURIComponent(filter);
+      var newHash = buildHash({ filter: filter, q: q });
       if (window.location.hash !== newHash) {
         window.location.hash = newHash;
       }
     }
   }
 
+  function populateDatalist() {
+    if (!techDatalist) return;
+    var seen = {};
+    var labels = [];
+    projectCards.forEach(function (card) {
+      (card._ptagEls || []).forEach(function (ptagEl) {
+        var label = ptagEl.textContent.trim();
+        if (label && !seen[label]) {
+          seen[label] = true;
+          labels.push(label);
+        }
+      });
+    });
+    labels.sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+    labels.forEach(function (label) {
+      var opt = document.createElement('option');
+      opt.value = label;
+      techDatalist.appendChild(opt);
+    });
+  }
+
   if (filterChips.length && projectCards.length) {
-    var initialFilter = readFilter();
-    applyFilter(initialFilter);
-    setActiveChip(initialFilter);
+    // Precompute a lowercase search haystack and cached ptag list per card
+    // once — cards are static, so there's no need to re-query on every
+    // keystroke.
+    projectCards.forEach(function (card) {
+      var nameEl = card.querySelector('.project-name');
+      var descEl = card.querySelector('.project-desc');
+      var ptagEls = Array.prototype.slice.call(card.querySelectorAll('.ptag'));
+      var parts = [];
+      if (nameEl) parts.push(nameEl.textContent);
+      if (descEl) parts.push(descEl.textContent);
+      ptagEls.forEach(function (t) {
+        parts.push(t.textContent);
+      });
+      card._searchHaystack = parts.join(' ').toLowerCase();
+      card._ptagEls = ptagEls;
+    });
+
+    var initialState = readState();
+    currentFilterValue = initialState.filter;
+    applyFilter(initialState.filter, initialState.q);
+    setActiveChip(initialState.filter);
     // Only remember the choice locally on load — don't force a hash
     // push if one wasn't already present in the URL.
-    writeStoredFilter(initialFilter);
+    writeStoredFilter(initialState.filter);
+
+    if (searchWrap) {
+      // No-JS ships this hidden; JS is what reveals it.
+      searchWrap.hidden = false;
+    }
+    if (searchInput) {
+      searchInput.value = initialState.q;
+      syncClearButton();
+      populateDatalist();
+
+      searchInput.addEventListener('input', function () {
+        syncClearButton();
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(applyAndSyncURL, SEARCH_DEBOUNCE_MS);
+      });
+
+      // Escape inside the box clears it — but doesn't stop propagation,
+      // so the existing nav Escape handler (which only acts when the nav
+      // is open) still sees the event.
+      searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && searchInput.value !== '') {
+          e.preventDefault();
+          clearTimeout(searchDebounceTimer);
+          searchInput.value = '';
+          syncClearButton();
+          applyAndSyncURL();
+        }
+      });
+    }
+
+    if (searchClearBtn && searchInput) {
+      searchClearBtn.addEventListener('click', function () {
+        clearTimeout(searchDebounceTimer);
+        searchInput.value = '';
+        syncClearButton();
+        applyAndSyncURL();
+        searchInput.focus();
+      });
+    }
+
+    if (emptyClearBtn) {
+      emptyClearBtn.addEventListener('click', function () {
+        clearTimeout(searchDebounceTimer);
+        if (searchInput) {
+          searchInput.value = '';
+          syncClearButton();
+        }
+        selectFilter('all', true);
+        if (searchInput) {
+          searchInput.focus();
+        }
+      });
+    }
 
     filterChips.forEach(function (chip, index) {
       chip.addEventListener('click', function () {
@@ -344,15 +516,40 @@
     });
 
     // Browser Back/Forward changes the hash without a click — re-read
-    // it and re-apply, but never push a hash from here (no push loop).
+    // both keys and re-apply, including writing the query back into the
+    // input, but never push a hash from here (no push loop).
     window.addEventListener('hashchange', function () {
       var hash = window.location.hash || '';
       if (hash !== '' && hash.indexOf('#projects') !== 0) {
         return;
       }
-      var filter = readFilter();
-      applyFilter(filter);
-      setActiveChip(filter);
+      clearTimeout(searchDebounceTimer);
+      var state = readState();
+      currentFilterValue = state.filter;
+      if (searchInput && searchInput.value.trim() !== state.q) {
+        searchInput.value = state.q;
+      }
+      syncClearButton();
+      applyFilter(state.filter, state.q);
+      setActiveChip(state.filter);
+    });
+
+    // Pressing "/" focuses the search box, unless a modifier is held or
+    // the event target is already an editable element (including the
+    // search box itself while typing).
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+      var target = e.target;
+      var tag = target && target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (target && target.isContentEditable)) {
+        return;
+      }
+      if (searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
     });
   }
 
