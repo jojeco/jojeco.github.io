@@ -65,6 +65,45 @@ html {
   left: 8px;
 }
 
+/* --- Back to top --- */
+.back-to-top {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity var(--transition), transform var(--transition), background var(--transition), border-color var(--transition), visibility var(--transition);
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 a:focus-visible,
 .btn:focus-visible,
 .nav-toggle:focus-visible,
@@ -1189,6 +1228,12 @@ img {
   .btn-secondary:hover,
   .project-card:hover,
   .contact-link:hover {
+    transform: none;
+  }
+
+  /* Keep the show/hide toggle instant instead of sliding in */
+  .back-to-top {
+    transition: none;
     transform: none;
   }
 }

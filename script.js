@@ -68,6 +68,31 @@
   updateNav();
   window.addEventListener('scroll', updateNav, { passive: true });
 
+  // --- Back to top button ---
+  // Visible once the user has scrolled past the hero. The href is "#main",
+  // so the existing a[href^="#"] handler below already owns the smooth/
+  // instant (reduced-motion aware) scroll and focus move — no duplicate
+  // scroll logic here, just the show/hide toggle, throttled via
+  // requestAnimationFrame so it isn't recomputed on every raw scroll event.
+  var backToTop = document.getElementById('back-to-top');
+  var hero = document.getElementById('hero');
+  if (backToTop) {
+    var backToTopTicking = false;
+    function updateBackToTop() {
+      var threshold = hero ? hero.offsetTop + hero.offsetHeight : window.innerHeight;
+      backToTop.classList.toggle('is-visible', window.scrollY > threshold);
+      backToTopTicking = false;
+    }
+    function onBackToTopScroll() {
+      if (!backToTopTicking) {
+        backToTopTicking = true;
+        window.requestAnimationFrame(updateBackToTop);
+      }
+    }
+    updateBackToTop();
+    window.addEventListener('scroll', onBackToTopScroll, { passive: true });
+  }
+
   // --- Theme (light/dark) ---
   // The inline <head> script has already resolved and applied data-theme.
   // 'jc-theme' stores only an explicit user choice; with nothing stored the
