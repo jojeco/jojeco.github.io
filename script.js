@@ -178,6 +178,18 @@
   // Respect the OS "reduce motion" setting: jump instead of animating.
   var reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // Shared by the nav-link handler below and the Skills-tag jump-to-projects
+  // feature: scrolls to an element (instant under reduced-motion) and moves
+  // focus there, giving it a tabindex first if it isn't natively focusable.
+  function scrollToEl(target) {
+    if (!target) return;
+    target.scrollIntoView({ behavior: reduceMotionQuery.matches ? 'auto' : 'smooth' });
+    if (!target.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) {
+      target.setAttribute('tabindex', '-1');
+    }
+    target.focus({ preventScroll: true });
+  }
+
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
       var href = this.getAttribute('href');
@@ -187,13 +199,10 @@
       var target = document.querySelector(href);
       if (target) {
         e.preventDefault();
-        target.scrollIntoView({ behavior: reduceMotionQuery.matches ? 'auto' : 'smooth' });
         // preventDefault() skips the browser's own focus transfer, so
-        // move focus to the target (skip link, keyboard nav) ourselves.
-        if (!target.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) {
-          target.setAttribute('tabindex', '-1');
-        }
-        target.focus({ preventScroll: true });
+        // scrollToEl() moves focus to the target (skip link, keyboard nav)
+        // itself.
+        scrollToEl(target);
       }
     });
   });
@@ -259,6 +268,15 @@
     }
   }
 
+  // Case-insensitive substring match of a (already-trimmed) query against a
+  // card's precomputed haystack (name + description + ptags, lowercased —
+  // see the _searchHaystack precompute below). Shared by applyFilter and by
+  // the Skills-tag safety check, which needs the exact same matching rule
+  // the live search box uses.
+  function cardMatchesQuery(card, query) {
+    return query === '' || (card._searchHaystack || '').indexOf(query) !== -1;
+  }
+
   // Generalised filter: combines the category (AND) with a case-insensitive,
   // trimmed text match against each card's name, description and ptags.
   // The only place that sets card.style.display, adds .visible, calls
@@ -269,7 +287,7 @@
     projectCards.forEach(function (card) {
       var tags = (card.getAttribute('data-tags') || '').split(' ');
       var categoryMatches = filter === 'all' || tags.indexOf(filter) !== -1;
-      var textMatches = query === '' || (card._searchHaystack || '').indexOf(query) !== -1;
+      var textMatches = cardMatchesQuery(card, query);
       var matches = categoryMatches && textMatches;
       card.style.display = matches ? '' : 'none';
       if (matches) {
@@ -436,6 +454,99 @@
     });
   }
 
+  // --- Skill tags jump to matching projects ---
+  // Hand-written alias table: the exact <span class="tag"> label text in
+  // the Skills section (trimmed) mapped to the search query the finder
+  // should run, plus a short display "name" for the aria-label. Skills with
+  // no real project behind them are simply absent here and stay plain text.
+  // Verified against the actual project-card markup (name + .project-desc +
+  // .ptag text — the same fields _searchHaystack below is built from, NOT
+  // the separate .project-services paragraph) before shipping; see NEXT.md.
+  // n8n, Vercel, Railway and Uptime Kuma are included even though they only
+  // match via .project-desc text, not a .ptag: JoBot and MCP Server both
+  // describe "n8n ... triggers"; Scheduling System's desc names Vercel and
+  // Railway; Home Lab and Ops Dashboard both mention "Uptime Kuma".
+  var SKILL_PROJECT_ALIASES = {
+    'Docker / Docker Compose': { query: 'docker', name: 'Docker' },
+    'Tailwind CSS': { query: 'tailwind', name: 'Tailwind' },
+    'Prometheus / Grafana': { query: 'prometheus', name: 'Prometheus' },
+    'Cloudflare Tunnels & DNS': { query: 'cloudflare', name: 'Cloudflare' },
+    'Claude Code / Anthropic API': { query: 'claude code', name: 'Claude Code' },
+    'MCP (Custom Server)': { query: 'mcp', name: 'MCP' },
+    'REST API Design': { query: 'rest api', name: 'REST API' },
+    'Firebase Auth / JWT': { query: 'firebase', name: 'Firebase' },
+    'Node.js': { query: 'node.js', name: 'Node.js' },
+    'React': { query: 'react', name: 'React' },
+    'TypeScript': { query: 'typescript', name: 'TypeScript' },
+    'Vite': { query: 'vite', name: 'Vite' },
+    'shadcn/ui': { query: 'shadcn', name: 'shadcn/ui' },
+    'Express': { query: 'express', name: 'Express' },
+    'PostgreSQL': { query: 'postgresql', name: 'PostgreSQL' },
+    'Proxmox': { query: 'proxmox', name: 'Proxmox' },
+    'Nginx': { query: 'nginx', name: 'Nginx' },
+    'Uptime Kuma': { query: 'uptime kuma', name: 'Uptime Kuma' },
+    'AdGuard Home': { query: 'adguard', name: 'AdGuard' },
+    'LiteLLM': { query: 'litellm', name: 'LiteLLM' },
+    'Ollama': { query: 'ollama', name: 'Ollama' },
+    'n8n': { query: 'n8n', name: 'n8n' },
+    'Vercel': { query: 'vercel', name: 'Vercel' },
+    'Railway': { query: 'railway', name: 'Railway' },
+    'Cloudflare Pages': { query: 'cloudflare pages', name: 'Cloudflare Pages' }
+  };
+
+  // Upgrades matched <span class="tag"> elements into interactive
+  // tag-links. Safety check: a tag only becomes clickable/focusable if its
+  // alias query matches at least one project card, counted across all
+  // cards regardless of the current category filter (activation always
+  // resets the category to "all", so that's the count that matters), via
+  // the same cardMatchesQuery() the search box itself uses. That way a
+  // stale alias entry can never lead to an empty result.
+  function initSkillTagLinks() {
+    if (!searchInput) return;
+    var skillTagEls = document.querySelectorAll('.skill-tags .tag');
+    var projectsSection = document.getElementById('projects');
+
+    function activate(query) {
+      searchInput.value = query;
+      syncClearButton();
+      // selectFilter() reads the query straight from the input, applies the
+      // "all" category + query filter, updates the chip UI, and — because
+      // pushHash is true — writes a real history entry via buildHash() so
+      // Back/Forward works. It also re-applies the exact same state via the
+      // existing hashchange handler if that handler fires.
+      selectFilter('all', true);
+      scrollToEl(projectsSection);
+      searchInput.focus({ preventScroll: true });
+    }
+
+    skillTagEls.forEach(function (tagEl) {
+      var label = tagEl.textContent.trim();
+      var alias = SKILL_PROJECT_ALIASES[label];
+      if (!alias) return;
+      var query = alias.query.toLowerCase();
+      var matchCount = 0;
+      projectCards.forEach(function (card) {
+        if (cardMatchesQuery(card, query)) matchCount++;
+      });
+      if (matchCount < 1) return;
+
+      tagEl.classList.add('tag-link');
+      tagEl.setAttribute('role', 'button');
+      tagEl.setAttribute('tabindex', '0');
+      tagEl.setAttribute('aria-label', 'Show projects using ' + alias.name + ' (' + matchCount + ')');
+
+      tagEl.addEventListener('click', function () {
+        activate(alias.query);
+      });
+      tagEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          activate(alias.query);
+        }
+      });
+    });
+  }
+
   if (filterChips.length && projectCards.length) {
     // Precompute a lowercase search haystack and cached ptag list per card
     // once — cards are static, so there's no need to re-query on every
@@ -500,6 +611,11 @@
         searchInput.focus();
       });
     }
+
+    // Wire up clickable Skills-section tags now that the per-card search
+    // haystacks are precomputed and the search box is ready to receive a
+    // query from them.
+    initSkillTagLinks();
 
     if (emptyClearBtn) {
       emptyClearBtn.addEventListener('click', function () {
