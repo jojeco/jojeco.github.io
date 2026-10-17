@@ -244,6 +244,7 @@
   var searchWrap = document.getElementById('project-search-wrap');
   var searchInput = document.getElementById('project-search');
   var searchClearBtn = document.getElementById('project-search-clear');
+  var searchHint = document.querySelector('.project-search-hint');
   var techDatalist = document.getElementById('project-tech-list');
   var FILTER_STORAGE_KEY = 'jc-project-filter';
   var SEARCH_DEBOUNCE_MS = 250;
@@ -392,6 +393,11 @@
   function syncClearButton() {
     if (searchClearBtn && searchInput) {
       searchClearBtn.hidden = searchInput.value.length === 0;
+    }
+    if (searchHint && searchInput) {
+      searchHint.innerHTML = searchInput.value.length > 0
+        ? 'Press <span class="project-search-key">Esc</span> to clear'
+        : 'Press <span class="project-search-key">/</span> to search';
     }
   }
 
