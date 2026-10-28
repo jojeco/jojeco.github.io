@@ -531,6 +531,33 @@
     </div>
   </section>
 
+  <!-- Project detail modal. Populated/opened by script.js (progressive
+       enhancement: only wired up when the browser supports
+       dialog.showModal(); otherwise this markup stays inert and hidden). -->
+  <dialog id="project-modal" class="project-modal" aria-labelledby="project-modal-title">
+    <header class="project-modal-header">
+      <div class="project-modal-title-wrap">
+        <h3 id="project-modal-title"></h3>
+        <span class="badge project-modal-badge" hidden></span>
+      </div>
+      <button type="button" class="project-modal-close" id="project-modal-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </header>
+    <div class="project-modal-body" id="project-modal-body"></div>
+    <footer class="project-modal-footer">
+      <button type="button" class="project-modal-nav" id="project-modal-prev" aria-label="Previous project">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="project-modal-counter" id="project-modal-counter"></span>
+      <button type="button" class="project-modal-nav" id="project-modal-next" aria-label="Next project">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button type="button" class="project-modal-copy" id="project-modal-copy">Copy link</button>
+      <span class="project-modal-copy-status" id="project-modal-copy-status" aria-live="polite"></span>
+    </footer>
+  </dialog>
+
   <a href="#main" class="back-to-top" id="back-to-top" aria-label="Back to top">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
   </a>

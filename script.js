@@ -700,4 +700,322 @@
     });
   }
 
+  // --- Project detail modal ---
+  // Progressive enhancement: skipped unless dialog.showModal() exists, so
+  // with JS off or on an unsupported browser the page is unchanged — no
+  // Details buttons, no card-click behavior. Reuses projectCards,
+  // applyFilter()'s card.style.display convention, and buildHash() from
+  // the block above. The hashchange listener up there ignores any hash
+  // that doesn't start with "#projects", so "#project=<slug>" never
+  // reaches it — this block owns that hash via its own listener.
+  var projectModal = document.getElementById('project-modal');
+
+  if (projectCards.length && projectModal && typeof projectModal.showModal === 'function') {
+    var modalTitleEl = document.getElementById('project-modal-title');
+    var modalBadgeEl = document.querySelector('.project-modal-badge');
+    var modalBodyEl = document.getElementById('project-modal-body');
+    var modalCounterEl = document.getElementById('project-modal-counter');
+    var modalPrevBtn = document.getElementById('project-modal-prev');
+    var modalNextBtn = document.getElementById('project-modal-next');
+    var modalCloseBtn = document.getElementById('project-modal-close');
+    var modalCopyBtn = document.getElementById('project-modal-copy');
+    var modalCopyStatusEl = document.getElementById('project-modal-copy-status');
+    var modalTrigger = null;
+    var copyStatusTimer = null;
+    var PROJECT_HASH_RE = /^#project=([\w-]+)$/;
+
+    function slugify(name) {
+      return (name || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    // Cache each card's slug once — names are static, no need to
+    // re-derive it on every open.
+    projectCards.forEach(function (card) {
+      var nameEl = card.querySelector('.project-name');
+      card.dataset.slug = slugify(nameEl ? nameEl.textContent : '');
+    });
+
+    function cardBySlug(slug) {
+      for (var i = 0; i < projectCards.length; i++) {
+        if (projectCards[i].dataset.slug === slug) {
+          return projectCards[i];
+        }
+      }
+      return null;
+    }
+
+    // The only thing applyFilter() (above) actually toggles per-card is
+    // card.style.display — checking that directly, rather than inventing
+    // a parallel "visible" flag, keeps this in sync with the current
+    // category + search filter for free.
+    function visibleCards() {
+      return Array.prototype.filter.call(projectCards, function (card) {
+        return card.style.display !== 'none';
+      });
+    }
+
+    function updateModalCounter(card) {
+      var list = visibleCards();
+      var idx = list.indexOf(card);
+      if (modalCounterEl) {
+        if (!list.length) {
+          modalCounterEl.textContent = '0 of 0';
+        } else {
+          // A direct deep link can open a card the current filter/search
+          // is hiding; it won't be in the visible list, so there's no
+          // real position to report — show it as 1-of-N rather than a
+          // confusing "0 of N".
+          modalCounterEl.textContent = (idx === -1 ? 1 : idx + 1) + ' of ' + list.length;
+        }
+      }
+      return list;
+    }
+
+    // Deep-clones the card's content panels into the modal body, stripping
+    // the cloned Details button and any ids (so there's never a duplicate
+    // id while the clone is in the DOM).
+    function fillModal(card) {
+      var nameEl = card.querySelector('.project-name');
+      if (modalTitleEl) {
+        modalTitleEl.textContent = nameEl ? nameEl.textContent : '';
+      }
+
+      var badgeEl = card.querySelector('.badge');
+      if (modalBadgeEl) {
+        if (badgeEl) {
+          modalBadgeEl.className = badgeEl.className + ' project-modal-badge';
+          modalBadgeEl.textContent = badgeEl.textContent;
+          modalBadgeEl.hidden = false;
+        } else {
+          modalBadgeEl.hidden = true;
+        }
+      }
+
+      if (modalBodyEl) {
+        modalBodyEl.innerHTML = '';
+        ['.project-desc', '.project-services', '.project-tags', '.project-links'].forEach(function (selector) {
+          var el = card.querySelector(selector);
+          if (!el) return;
+          var clone = el.cloneNode(true);
+          var openBtn = clone.querySelector('.project-open');
+          if (openBtn) openBtn.remove();
+          clone.removeAttribute('id');
+          clone.querySelectorAll('[id]').forEach(function (node) {
+            node.removeAttribute('id');
+          });
+          modalBodyEl.appendChild(clone);
+        });
+      }
+    }
+
+    function openProject(card, pushHash, trigger) {
+      if (!card) return;
+      modalTrigger = trigger || card.querySelector('.project-open') || null;
+      fillModal(card);
+      updateModalCounter(card);
+      projectModal.dataset.openSlug = card.dataset.slug;
+      document.body.classList.add('modal-open');
+      if (!projectModal.open) {
+        projectModal.showModal();
+      }
+      if (pushHash) {
+        var newHash = '#project=' + card.dataset.slug;
+        if (window.location.hash !== newHash) {
+          history.pushState(null, '', newHash);
+        }
+      }
+    }
+
+    // Steps Prev(-1)/Next(+1) through the currently visible cards, with
+    // wraparound, and swaps the modal content in place via replaceState
+    // (no history entry per step — only the initial open/close go through
+    // push/pop).
+    function stepProject(delta) {
+      var list = visibleCards();
+      if (!list.length) return;
+      var currentSlug = projectModal.dataset.openSlug;
+      var idx = -1;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].dataset.slug === currentSlug) {
+          idx = i;
+          break;
+        }
+      }
+      // The open card may not be in the visible list at all (a deep link
+      // opened a card the stored filter hides) — land on the first card
+      // for Next, the last for Prev, instead of treating "not found" as
+      // index 0 and skipping list[0] on the very first Next press.
+      var nextCard = idx === -1
+        ? list[delta > 0 ? 0 : list.length - 1]
+        : list[(idx + delta + list.length) % list.length];
+      fillModal(nextCard);
+      updateModalCounter(nextCard);
+      projectModal.dataset.openSlug = nextCard.dataset.slug;
+      var newHash = '#project=' + nextCard.dataset.slug;
+      if (window.location.hash !== newHash) {
+        history.replaceState(null, '', newHash);
+      }
+    }
+
+    function showCopyStatus(message) {
+      if (!modalCopyStatusEl) return;
+      modalCopyStatusEl.textContent = message;
+      clearTimeout(copyStatusTimer);
+      copyStatusTimer = setTimeout(function () {
+        modalCopyStatusEl.textContent = '';
+      }, 2000);
+    }
+
+    // navigator.clipboard requires a secure context and isn't guaranteed
+    // (older browsers, non-HTTPS previews) — fall back to a temporary,
+    // off-screen input + select() + execCommand('copy').
+    function fallbackCopy(text) {
+      var tempInput = document.createElement('input');
+      tempInput.value = text;
+      tempInput.setAttribute('readonly', '');
+      tempInput.style.position = 'fixed';
+      tempInput.style.left = '-9999px';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {
+        // Nothing more to try — the live region simply won't confirm.
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    if (modalCopyBtn) {
+      modalCopyBtn.addEventListener('click', function () {
+        var url = window.location.origin + window.location.pathname + '#project=' + projectModal.dataset.openSlug;
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText(url).then(function () {
+            showCopyStatus('Link copied');
+          }, function () {
+            fallbackCopy(url);
+            showCopyStatus('Link copied');
+          });
+        } else {
+          fallbackCopy(url);
+          showCopyStatus('Link copied');
+        }
+      });
+    }
+
+    if (modalPrevBtn) {
+      modalPrevBtn.addEventListener('click', function () {
+        stepProject(-1);
+      });
+    }
+    if (modalNextBtn) {
+      modalNextBtn.addEventListener('click', function () {
+        stepProject(1);
+      });
+    }
+    if (modalCloseBtn) {
+      modalCloseBtn.addEventListener('click', function () {
+        projectModal.close();
+      });
+    }
+
+    // A click landing on the dialog element itself (not a child) hit the
+    // ::backdrop area.
+    projectModal.addEventListener('click', function (e) {
+      if (e.target === projectModal) {
+        projectModal.close();
+      }
+    });
+
+    // 'close' fires for Escape, close(), and the backdrop handler above —
+    // one place for cleanup regardless of how the dialog was closed.
+    projectModal.addEventListener('close', function () {
+      document.body.classList.remove('modal-open');
+      if (modalTrigger && typeof modalTrigger.focus === 'function') {
+        modalTrigger.focus();
+      }
+      modalTrigger = null;
+      var hash = window.location.hash || '';
+      if (PROJECT_HASH_RE.test(hash)) {
+        // Not readState(): "#project=<slug>" doesn't start with
+        // "#projects", so readState() would take its no-hash branch and
+        // drop the live search query. showModal() makes the chips/search
+        // box inert while open, so the in-memory filter + query are the
+        // correct values to rebuild the hash from.
+        history.replaceState(null, '', buildHash({ filter: currentFilterValue, q: currentQuery() }));
+      }
+    });
+
+    // ArrowLeft/ArrowRight browse Prev/Next while the dialog is open,
+    // unless focus is inside an editable control (there's no input in the
+    // modal itself today, but this guards against e.g. a user focusing an
+    // unrelated field without the dialog having visually closed).
+    document.addEventListener('keydown', function (e) {
+      if (!projectModal.open) return;
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var target = e.target;
+      var tag = target && target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (target && target.isContentEditable)) {
+        return;
+      }
+      e.preventDefault();
+      stepProject(e.key === 'ArrowRight' ? 1 : -1);
+    });
+
+    // Adds the "Details" button to each card's header and makes the rest
+    // of the card (anywhere that isn't an <a> or <button>) open it too.
+    function enhanceCards() {
+      projectCards.forEach(function (card) {
+        var header = card.querySelector('.project-header');
+        if (!header || header.querySelector('.project-open')) return;
+
+        var nameEl = card.querySelector('.project-name');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'project-open';
+        btn.textContent = 'Details';
+        btn.setAttribute('aria-label', 'View details for ' + (nameEl ? nameEl.textContent : 'this project'));
+        header.appendChild(btn);
+        card.classList.add('has-detail');
+
+        btn.addEventListener('click', function () {
+          openProject(card, true, btn);
+        });
+
+        card.addEventListener('click', function (e) {
+          // Never hijack a click on the GitHub/live-demo links or the
+          // Details button itself (already handled by its own listener).
+          if (e.target.closest('a, button')) return;
+          openProject(card, true, btn);
+        });
+      });
+    }
+
+    enhanceCards();
+
+    // Opens (or closes) the modal to match "#project=<slug>" in the URL —
+    // run once on load for a direct deep link, and again on every
+    // hashchange (Back/Forward, or the hash changing away while open).
+    function syncModalWithHash() {
+      var hash = window.location.hash || '';
+      var match = hash.match(PROJECT_HASH_RE);
+      if (!match) {
+        if (projectModal.open) {
+          projectModal.close();
+        }
+        return;
+      }
+      var card = cardBySlug(match[1]);
+      if (card) {
+        openProject(card, false);
+      }
+    }
+
+    syncModalWithHash();
+    window.addEventListener('hashchange', syncModalWithHash);
+  }
+
 })();

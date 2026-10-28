@@ -789,12 +789,17 @@ img {
 .project-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 12px;
   gap: 12px;
 }
 
+/* flex: 1 (instead of the header's old justify-content: space-between)
+   absorbs the remaining row width so the badge — and the Details button
+   script.js appends after it — stay pinned to the right, whether there
+   are one or two siblings after the name. */
 .project-name {
+  flex: 1;
+  min-width: 0;
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -878,6 +883,253 @@ img {
 .project-link:hover {
   color: var(--accent-bright);
   text-decoration: underline;
+}
+
+/* --- Project detail modal trigger (added by script.js per card) --- */
+.project-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.project-open:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.project-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Whole-card click affordance once script.js has wired it up; the card
+   itself stays an <article>, not a button, so the GitHub link and body
+   text keep working exactly as before. */
+.project-card.has-detail {
+  cursor: pointer;
+}
+
+/* --- Project detail modal --- */
+.project-modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(640px, calc(100vw - 48px));
+  max-height: min(680px, calc(100vh - 48px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  flex-direction: column;
+}
+
+/* The UA stylesheet already hides dialog:not([open]); only set the flex
+   layout (and the entrance animation) once it's actually the modal. */
+.project-modal[open] {
+  display: flex;
+  animation: project-modal-in 0.2s ease;
+}
+
+.project-modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+@keyframes project-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.project-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+#project-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.project-modal-badge {
+  flex-shrink: 0;
+}
+
+.project-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.project-modal-close:hover {
+  color: var(--text);
+  background: var(--overlay-hover);
+}
+
+.project-modal-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Cloned card content loses the grid/flex context it had inside
+   .project-card, so a couple of margins need resetting for a standalone
+   reading view. */
+.project-modal-body .project-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.project-modal-body .project-services {
+  margin-bottom: 16px;
+}
+
+.project-modal-body .project-tags {
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.project-modal-body .project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.project-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.project-modal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.project-modal-nav:hover {
+  border-color: var(--text-dim);
+  color: var(--accent);
+}
+
+.project-modal-nav:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-modal-counter {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-right: auto;
+}
+
+.project-modal-copy {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.project-modal-copy:hover {
+  opacity: 0.9;
+}
+
+.project-modal-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-modal-copy-status {
+  font-size: 0.78rem;
+  color: var(--green);
+  min-height: 1em;
+}
+
+/* Scroll lock while the modal is open — set/cleared by script.js. */
+body.modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .project-modal {
+    inset: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+  }
 }
 
 /* --- Timeline (Education & Experience) --- */
@@ -1218,6 +1470,14 @@ img {
 
 :root[data-theme="light"] .btn-primary:hover {
   box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
+}
+
+/* The modal reuses --bg-card/--border/--text everywhere, so it already
+   repaints correctly in light theme; the backdrop is the one spot with a
+   fixed color, kept a touch lighter here so the white dialog still reads
+   as "lifted" above it instead of nearly merging with a washed-out scrim. */
+:root[data-theme="light"] .project-modal::backdrop {
+  background: rgba(27, 31, 36, 0.4);
 }
 
 /* ============================================
