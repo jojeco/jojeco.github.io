@@ -190,6 +190,27 @@
     target.focus({ preventScroll: true });
   }
 
+  // navigator.clipboard requires a secure context and isn't guaranteed
+  // (older browsers, non-HTTPS previews) — fall back to a temporary,
+  // off-screen input + select() + execCommand('copy'). Lives at IIFE scope
+  // (moved out of the project-modal block below) so the command palette's
+  // copy-email action can reuse it too.
+  function fallbackCopy(text) {
+    var tempInput = document.createElement('input');
+    tempInput.value = text;
+    tempInput.setAttribute('readonly', '');
+    tempInput.style.position = 'fixed';
+    tempInput.style.left = '-9999px';
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      // Nothing more to try — the live region simply won't confirm.
+    }
+    document.body.removeChild(tempInput);
+  }
+
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
       var href = this.getAttribute('href');
@@ -460,6 +481,26 @@
     });
   }
 
+  // Shared by the Skills-tag click/keyboard handler and the command
+  // palette's Skill results (moved out of initSkillTagLinks() so both can
+  // call it): applies a finder query against the "all" category, syncs the
+  // URL hash, scrolls to Projects and focuses the search box.
+  var projectsSection = document.getElementById('projects');
+
+  function runProjectQuery(query) {
+    if (!searchInput) return;
+    searchInput.value = query;
+    syncClearButton();
+    // selectFilter() reads the query straight from the input, applies the
+    // "all" category + query filter, updates the chip UI, and — because
+    // pushHash is true — writes a real history entry via buildHash() so
+    // Back/Forward works. It also re-applies the exact same state via the
+    // existing hashchange handler if that handler fires.
+    selectFilter('all', true);
+    scrollToEl(projectsSection);
+    searchInput.focus({ preventScroll: true });
+  }
+
   // --- Skill tags jump to matching projects ---
   // Hand-written alias table: the exact <span class="tag"> label text in
   // the Skills section (trimmed) mapped to the search query the finder
@@ -500,6 +541,12 @@
     'Cloudflare Pages': { query: 'cloudflare pages', name: 'Cloudflare Pages' }
   };
 
+  // Populated by initSkillTagLinks() below with the subset of
+  // SKILL_PROJECT_ALIASES entries that actually got upgraded (>=1 matching
+  // card) — the command palette's Skill group is built from exactly this
+  // list, so it can never offer a skill that would land on zero results.
+  var acceptedSkillAliases = [];
+
   // Upgrades matched <span class="tag"> elements into interactive
   // tag-links. Safety check: a tag only becomes clickable/focusable if its
   // alias query matches at least one project card, counted across all
@@ -510,20 +557,6 @@
   function initSkillTagLinks() {
     if (!searchInput) return;
     var skillTagEls = document.querySelectorAll('.skill-tags .tag');
-    var projectsSection = document.getElementById('projects');
-
-    function activate(query) {
-      searchInput.value = query;
-      syncClearButton();
-      // selectFilter() reads the query straight from the input, applies the
-      // "all" category + query filter, updates the chip UI, and — because
-      // pushHash is true — writes a real history entry via buildHash() so
-      // Back/Forward works. It also re-applies the exact same state via the
-      // existing hashchange handler if that handler fires.
-      selectFilter('all', true);
-      scrollToEl(projectsSection);
-      searchInput.focus({ preventScroll: true });
-    }
 
     skillTagEls.forEach(function (tagEl) {
       var label = tagEl.textContent.trim();
@@ -536,18 +569,20 @@
       });
       if (matchCount < 1) return;
 
+      acceptedSkillAliases.push({ label: label, alias: alias, matchCount: matchCount });
+
       tagEl.classList.add('tag-link');
       tagEl.setAttribute('role', 'button');
       tagEl.setAttribute('tabindex', '0');
       tagEl.setAttribute('aria-label', 'Show projects using ' + alias.name + ' (' + matchCount + ')');
 
       tagEl.addEventListener('click', function () {
-        activate(alias.query);
+        runProjectQuery(alias.query);
       });
       tagEl.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
           e.preventDefault();
-          activate(alias.query);
+          runProjectQuery(alias.query);
         }
       });
     });
@@ -870,25 +905,6 @@
       }, 2000);
     }
 
-    // navigator.clipboard requires a secure context and isn't guaranteed
-    // (older browsers, non-HTTPS previews) — fall back to a temporary,
-    // off-screen input + select() + execCommand('copy').
-    function fallbackCopy(text) {
-      var tempInput = document.createElement('input');
-      tempInput.value = text;
-      tempInput.setAttribute('readonly', '');
-      tempInput.style.position = 'fixed';
-      tempInput.style.left = '-9999px';
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      try {
-        document.execCommand('copy');
-      } catch (e) {
-        // Nothing more to try — the live region simply won't confirm.
-      }
-      document.body.removeChild(tempInput);
-    }
-
     if (modalCopyBtn) {
       modalCopyBtn.addEventListener('click', function () {
         var url = window.location.origin + window.location.pathname + '#project=' + projectModal.dataset.openSlug;
@@ -1016,6 +1032,496 @@
 
     syncModalWithHash();
     window.addEventListener('hashchange', syncModalWithHash);
+  }
+
+  // --- Command palette (Ctrl+K / Cmd+K) ---
+  // Progressive enhancement like the project modal above: inert unless
+  // dialog.showModal() is supported. Reuses projectCards, selectFilter/
+  // syncClearButton/searchInput/scrollToEl, setTheme/currentTheme,
+  // acceptedSkillAliases, fallbackCopy and runProjectQuery from above.
+  var commandPalette = document.getElementById('command-palette');
+  var commandPaletteTrigger = document.getElementById('command-palette-trigger');
+
+  if (commandPalette && typeof commandPalette.showModal === 'function') {
+    var cpInput = document.getElementById('command-palette-input');
+    var cpList = document.getElementById('command-palette-list');
+    var cpEmpty = document.getElementById('command-palette-empty');
+    var cpStatus = document.getElementById('command-palette-status');
+    // projectModal is in reach here (declared at IIFE scope, above the
+    // "if (projectCards.length && projectModal && ...)" block it sits in).
+    var projectModalSupported = !!(projectModal && typeof projectModal.showModal === 'function');
+
+    var CP_RECENT_KEY = 'jc-palette-recent';
+    var CP_RECENT_MAX = 5;
+    var CP_MAX_RESULTS = 12;
+    var CP_GROUP_ORDER = ['Sections', 'Projects', 'Skills', 'Actions'];
+
+    var cpItems = [];
+    var cpItemsById = {};
+    var cpResults = []; // flattened [{ group, item }] currently rendered
+    var cpSelectedIndex = -1;
+    var cpPriorFocus = null;
+    var cpOwnsModalOpenClass = false;
+    var cpSuppressFocusRestore = false;
+    var cpStatusTimer = null;
+
+    function cpAddItem(item) {
+      cpItems.push(item);
+      cpItemsById[item.id] = item;
+    }
+
+    function cpAnnounce(message) {
+      if (!cpStatus) return;
+      cpStatus.textContent = message;
+      clearTimeout(cpStatusTimer);
+      cpStatusTimer = setTimeout(function () {
+        cpStatus.textContent = '';
+      }, 2000);
+    }
+
+    // Same algorithm as the project-modal's slugify(), duplicated: that one
+    // is scoped inside the modal's own if-block, so it's unreachable here.
+    function cpSlugify(name) {
+      return (name || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    // --- Build the searchable item list once, from the live DOM ---
+
+    document.querySelectorAll('.nav-links a[href^="#"]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      var target = document.querySelector(href);
+      if (!target) return;
+      var label = a.textContent.trim();
+      cpAddItem({
+        id: 'section:' + href.slice(1),
+        group: 'Sections',
+        label: label,
+        hint: 'Section',
+        keywords: label.toLowerCase(),
+        run: function () { scrollToEl(target); }
+      });
+    });
+
+    projectCards.forEach(function (card) {
+      var nameEl = card.querySelector('.project-name');
+      var label = nameEl ? nameEl.textContent.trim() : '';
+      var slug = card.dataset.slug || cpSlugify(label);
+      var badgeEl = card.querySelector('.badge');
+      var hint = badgeEl ? badgeEl.textContent.trim() : '';
+      cpAddItem({
+        id: 'project:' + slug,
+        group: 'Projects',
+        label: label,
+        hint: hint,
+        keywords: card._searchHaystack || label.toLowerCase(),
+        run: function () {
+          if (projectModalSupported) {
+            window.location.hash = '#project=' + slug;
+          } else {
+            scrollToEl(card);
+          }
+        }
+      });
+    });
+
+    acceptedSkillAliases.forEach(function (entry) {
+      cpAddItem({
+        id: 'skill:' + entry.label,
+        group: 'Skills',
+        label: entry.alias.name,
+        hint: 'Skill',
+        keywords: (entry.label + ' ' + entry.alias.name + ' ' + entry.alias.query).toLowerCase(),
+        run: function () { runProjectQuery(entry.alias.query); }
+      });
+    });
+
+    var themeActionItem = {
+      id: 'action:theme',
+      group: 'Actions',
+      label: '',
+      hint: '',
+      keywords: 'theme dark light switch toggle appearance',
+      run: function () {
+        setTheme(currentTheme() === 'light' ? 'dark' : 'light');
+      }
+    };
+    function cpRefreshThemeAction() {
+      var isLight = currentTheme() === 'light';
+      themeActionItem.label = isLight ? 'Switch to dark theme' : 'Switch to light theme';
+      themeActionItem.hint = isLight ? 'Currently light' : 'Currently dark';
+    }
+    cpRefreshThemeAction();
+    cpAddItem(themeActionItem);
+
+    var emailLink = document.querySelector('#contact a[href^="mailto:"]');
+    if (emailLink) {
+      var emailAddress = emailLink.getAttribute('href').replace(/^mailto:/, '');
+      cpAddItem({
+        id: 'action:copy-email',
+        group: 'Actions',
+        label: 'Copy email address',
+        hint: emailAddress,
+        keywords: 'copy email contact address ' + emailAddress.toLowerCase(),
+        // Kept open (see cpRunItem) so the confirmation written to
+        // #command-palette-status is actually inside a still-open,
+        // non-inert dialog when it's announced.
+        keepOpen: true,
+        run: function () {
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(emailAddress).then(function () {
+              cpAnnounce('Email copied');
+            }, function () {
+              fallbackCopy(emailAddress);
+              cpAnnounce('Email copied');
+            });
+          } else {
+            fallbackCopy(emailAddress);
+            cpAnnounce('Email copied');
+          }
+        }
+      });
+    }
+
+    var resumeLink = document.querySelector('#contact a[href$=".pdf"]');
+    if (resumeLink) {
+      var resumeHref = resumeLink.getAttribute('href');
+      cpAddItem({
+        id: 'action:resume',
+        group: 'Actions',
+        label: 'Open résumé (PDF)',
+        hint: 'New tab',
+        keywords: 'resume cv pdf download',
+        run: function () { window.open(resumeHref, '_blank', 'noopener'); }
+      });
+    }
+
+    var githubLink = document.querySelector('#contact a[href*="github.com"]');
+    if (githubLink) {
+      var githubHref = githubLink.getAttribute('href');
+      cpAddItem({
+        id: 'action:github',
+        group: 'Actions',
+        label: 'Open GitHub profile',
+        hint: 'New tab',
+        keywords: 'github profile repo code',
+        run: function () { window.open(githubHref, '_blank', 'noopener'); }
+      });
+    }
+
+    var linkedinLink = document.querySelector('#contact a[href*="linkedin.com"]');
+    if (linkedinLink) {
+      var linkedinHref = linkedinLink.getAttribute('href');
+      cpAddItem({
+        id: 'action:linkedin',
+        group: 'Actions',
+        label: 'Open LinkedIn profile',
+        hint: 'New tab',
+        keywords: 'linkedin profile',
+        run: function () { window.open(linkedinHref, '_blank', 'noopener'); }
+      });
+    }
+
+    if (emptyClearBtn) {
+      cpAddItem({
+        id: 'action:clear-filters',
+        group: 'Actions',
+        label: 'Clear project filters',
+        hint: 'Action',
+        keywords: 'clear reset filters search projects',
+        // The existing handler focuses the search box itself.
+        movesFocus: true,
+        run: function () { emptyClearBtn.click(); }
+      });
+    }
+
+    // --- Matching / ranking ---
+    // Every space-separated query word must appear somewhere in
+    // label+keywords, or the item doesn't match at all (-1). Among matches,
+    // rank by how the *whole* trimmed query relates to the label: exact >
+    // starts-with > contains > keywords-only.
+    function cpItemScore(item, queryWords, rawQuery) {
+      var labelLower = item.label.toLowerCase();
+      var haystack = labelLower + ' ' + (item.keywords || '');
+      for (var i = 0; i < queryWords.length; i++) {
+        if (haystack.indexOf(queryWords[i]) === -1) return -1;
+      }
+      if (labelLower === rawQuery) return 3;
+      if (labelLower.indexOf(rawQuery) === 0) return 2;
+      if (labelLower.indexOf(rawQuery) !== -1) return 1;
+      return 0;
+    }
+
+    // Reads/writes are wrapped in try/catch like readStoredTheme() — bad
+    // JSON or an unavailable store just leaves "Recent" empty.
+    function cpReadRecent() {
+      try {
+        var arr = JSON.parse(window.localStorage.getItem(CP_RECENT_KEY) || '[]');
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function cpRecordRecent(id) {
+      var ids = cpReadRecent().filter(function (existingId) { return existingId !== id; });
+      ids.unshift(id);
+      try {
+        window.localStorage.setItem(CP_RECENT_KEY, JSON.stringify(ids.slice(0, CP_RECENT_MAX)));
+      } catch (e) {}
+    }
+
+    // Empty query -> Recent (ids that still resolve) + every group in fixed
+    // order, uncapped. Non-empty -> global top CP_MAX_RESULTS by score,
+    // then re-sorted back into fixed group order for display.
+    function cpGetMatches(query) {
+      cpRefreshThemeAction();
+      var trimmed = query.trim().toLowerCase();
+      var groups = {};
+      var order = [];
+
+      function addToGroup(groupName, item) {
+        if (!groups[groupName]) {
+          groups[groupName] = [];
+          order.push(groupName);
+        }
+        groups[groupName].push(item);
+      }
+
+      if (trimmed === '') {
+        // No cap here — Recent plus every group in fixed order, same as a
+        // closed/empty search: the whole site should stay reachable.
+        cpReadRecent().slice(0, CP_RECENT_MAX).forEach(function (id) {
+          var item = cpItemsById[id];
+          if (item) addToGroup('Recent', item);
+        });
+        CP_GROUP_ORDER.forEach(function (groupName) {
+          cpItems.forEach(function (item) {
+            if (item.group === groupName) addToGroup(groupName, item);
+          });
+        });
+        var flatAll = [];
+        order.forEach(function (groupName) {
+          groups[groupName].forEach(function (item) {
+            flatAll.push({ group: groupName, item: item });
+          });
+        });
+        return flatAll;
+      }
+
+      // Rank ALL matches by score first (so a high-scoring Skill/Action
+      // can't be crowded out by lower-scoring Project matches), take the
+      // global top ~12, THEN re-sort just that subset back into fixed
+      // group order for display.
+      var words = trimmed.split(/\s+/).filter(Boolean);
+      var scored = [];
+      cpItems.forEach(function (item) {
+        var score = cpItemScore(item, words, trimmed);
+        if (score >= 0) {
+          scored.push({ item: item, score: score, groupIndex: CP_GROUP_ORDER.indexOf(item.group) });
+        }
+      });
+      scored.sort(function (a, b) { return b.score - a.score; });
+      scored = scored.slice(0, CP_MAX_RESULTS);
+      scored.sort(function (a, b) { return a.groupIndex - b.groupIndex; });
+      return scored.map(function (s) { return { group: s.item.group, item: s.item }; });
+    }
+
+    // --- Rendering ---
+
+    function cpUpdateActiveDescendant() {
+      if (cpSelectedIndex >= 0) {
+        cpInput.setAttribute('aria-activedescendant', 'cp-opt-' + cpSelectedIndex);
+      } else {
+        cpInput.setAttribute('aria-activedescendant', '');
+      }
+    }
+
+    // skipScroll: true for mouse hover, so moving the cursor over
+    // partly-visible rows doesn't also yank the list around.
+    function cpSetSelected(idx, skipScroll) {
+      if (!cpResults.length) {
+        cpSelectedIndex = -1;
+        return;
+      }
+      var max = cpResults.length;
+      idx = ((idx % max) + max) % max;
+      cpSelectedIndex = idx;
+      var rows = cpList.querySelectorAll('.command-palette-option');
+      rows.forEach(function (row) {
+        row.setAttribute('aria-selected', Number(row.dataset.index) === idx ? 'true' : 'false');
+      });
+      cpUpdateActiveDescendant();
+      if (skipScroll) return;
+      var activeRow = document.getElementById('cp-opt-' + idx);
+      if (activeRow && typeof activeRow.scrollIntoView === 'function') {
+        activeRow.scrollIntoView({ block: 'nearest', behavior: reduceMotionQuery.matches ? 'auto' : 'smooth' });
+      }
+    }
+
+    function cpRender(query) {
+      var matches = cpGetMatches(query);
+      cpList.innerHTML = '';
+      cpResults = matches;
+      cpSelectedIndex = matches.length ? 0 : -1;
+
+      if (!matches.length) {
+        cpEmpty.hidden = false;
+        var trimmedQuery = query.trim();
+        cpEmpty.textContent = trimmedQuery === ''
+          ? 'Start typing to search…'
+          : 'No matches for “' + trimmedQuery + '”';
+        cpInput.setAttribute('aria-expanded', 'false');
+        cpUpdateActiveDescendant();
+        return;
+      }
+
+      cpEmpty.hidden = true;
+      cpInput.setAttribute('aria-expanded', 'true');
+
+      var lastGroup = null;
+      matches.forEach(function (m, idx) {
+        if (m.group !== lastGroup) {
+          var heading = document.createElement('li');
+          heading.className = 'command-palette-group-heading';
+          heading.setAttribute('role', 'presentation');
+          heading.textContent = m.group;
+          cpList.appendChild(heading);
+          lastGroup = m.group;
+        }
+
+        var row = document.createElement('li');
+        row.id = 'cp-opt-' + idx;
+        row.className = 'command-palette-option';
+        row.setAttribute('role', 'option');
+        row.setAttribute('aria-selected', idx === cpSelectedIndex ? 'true' : 'false');
+        row.dataset.index = String(idx);
+
+        var labelSpan = document.createElement('span');
+        labelSpan.className = 'command-palette-option-label';
+        labelSpan.textContent = m.item.label;
+        row.appendChild(labelSpan);
+
+        if (m.item.hint) {
+          var hintSpan = document.createElement('span');
+          hintSpan.className = 'command-palette-option-hint';
+          hintSpan.textContent = m.item.hint;
+          row.appendChild(hintSpan);
+        }
+
+        row.addEventListener('mouseenter', function () {
+          cpSetSelected(idx, true);
+        });
+        row.addEventListener('click', function () {
+          cpRunItem(m.item);
+        });
+
+        cpList.appendChild(row);
+      });
+
+      cpUpdateActiveDescendant();
+    }
+
+    // --- Open / close / run ---
+
+    // No-op while the project modal is open — never stack two <dialog>s.
+    function cpOpen() {
+      if ((projectModalSupported && projectModal.open) || commandPalette.open) return;
+      cpPriorFocus = document.activeElement;
+      cpSuppressFocusRestore = false;
+      cpInput.value = '';
+      cpRender('');
+      // Only take ownership (and later removal) of modal-open if nothing
+      // else — i.e. not the project modal — already set it.
+      cpOwnsModalOpenClass = !document.body.classList.contains('modal-open');
+      if (cpOwnsModalOpenClass) document.body.classList.add('modal-open');
+      commandPalette.showModal();
+      cpInput.focus();
+    }
+
+    function cpClose() {
+      if (commandPalette.open) commandPalette.close();
+    }
+
+    // Selection is recorded before run() fires, per spec. Section/Project/
+    // Skill items (and actions flagged movesFocus) move focus themselves,
+    // so the palette closes first (with focus-restore suppressed) so that
+    // focus move isn't fought or stacked on top of another open dialog.
+    function cpRunItem(item) {
+      cpRecordRecent(item.id);
+      if (item.group !== 'Actions' || item.movesFocus) {
+        cpSuppressFocusRestore = true;
+        cpClose();
+        item.run();
+        return;
+      }
+      item.run();
+      if (item.keepOpen) {
+        cpInput.focus();
+      } else {
+        cpClose();
+      }
+    }
+
+    commandPalette.addEventListener('close', function () {
+      if (cpOwnsModalOpenClass) {
+        document.body.classList.remove('modal-open');
+        cpOwnsModalOpenClass = false;
+      }
+      if (!cpSuppressFocusRestore && cpPriorFocus && typeof cpPriorFocus.focus === 'function') {
+        cpPriorFocus.focus();
+      }
+      cpPriorFocus = null;
+      cpSuppressFocusRestore = false;
+    });
+
+    // Backdrop click, same e.target === dialog pattern as the project modal.
+    commandPalette.addEventListener('click', function (e) {
+      if (e.target === commandPalette) {
+        cpClose();
+      }
+    });
+
+    cpInput.addEventListener('input', function () {
+      cpRender(cpInput.value);
+    });
+
+    cpInput.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        cpSetSelected(cpSelectedIndex + 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        cpSetSelected(cpSelectedIndex - 1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (cpSelectedIndex >= 0 && cpResults[cpSelectedIndex]) {
+          cpRunItem(cpResults[cpSelectedIndex].item);
+        }
+      }
+      // Home/End: left unhandled, so the input keeps its default behaviour.
+    });
+
+    if (commandPaletteTrigger) {
+      commandPaletteTrigger.hidden = false;
+      commandPaletteTrigger.addEventListener('click', cpOpen);
+    }
+
+    // Toggles from anywhere, including from inside the palette's own input.
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey) && !e.altKey) {
+        e.preventDefault();
+        if (commandPalette.open) {
+          cpClose();
+        } else {
+          cpOpen();
+        }
+      }
+    });
   }
 
 })();

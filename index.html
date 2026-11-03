@@ -57,6 +57,13 @@
         <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
+      <!-- Progressive enhancement, same pattern as #project-search-wrap:
+           ships hidden, script.js reveals it only once it has confirmed
+           dialog.showModal() support. -->
+      <button type="button" id="command-palette-trigger" class="command-palette-trigger" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span class="command-palette-trigger-key" aria-hidden="true">Ctrl K</span>
+      </button>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
         <span></span><span></span><span></span>
       </button>
@@ -555,6 +562,23 @@
       </button>
       <button type="button" class="project-modal-copy" id="project-modal-copy">Copy link</button>
       <span class="project-modal-copy-status" id="project-modal-copy-status" aria-live="polite"></span>
+    </footer>
+  </dialog>
+
+  <!-- Command palette. Same progressive-enhancement contract as
+       #project-modal: inert markup unless script.js confirms
+       dialog.showModal() support, in which case it builds a searchable
+       index of sections/projects/skills/actions from the live DOM. -->
+  <dialog id="command-palette" class="command-palette" aria-label="Command palette">
+    <div class="command-palette-input-row">
+      <svg class="command-palette-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="command-palette-input" class="command-palette-input" role="combobox" aria-expanded="false" aria-controls="command-palette-list" aria-activedescendant="" aria-autocomplete="list" aria-label="Search sections, projects, skills, and actions" autocomplete="off" spellcheck="false" placeholder="Search anything&hellip;">
+    </div>
+    <ul id="command-palette-list" class="command-palette-list" role="listbox" aria-label="Command palette results"></ul>
+    <p class="command-palette-empty" id="command-palette-empty" hidden></p>
+    <p class="command-palette-status" id="command-palette-status" aria-live="polite"></p>
+    <footer class="command-palette-footer">
+      <span><span class="command-palette-hint-key">Up</span>/<span class="command-palette-hint-key">Down</span> to move, <span class="command-palette-hint-key">Enter</span> to select, <span class="command-palette-hint-key">Esc</span> to close</span>
     </footer>
   </dialog>
 

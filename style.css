@@ -246,6 +246,52 @@ img {
   display: block;
 }
 
+.command-palette-trigger {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  margin-left: 8px;
+  padding: 0 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.command-palette-trigger:not([hidden]) {
+  display: inline-flex;
+}
+
+.command-palette-trigger:hover {
+  color: var(--text);
+  background: var(--overlay-hover);
+  border-color: var(--text-dim);
+}
+
+.command-palette-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.command-palette-trigger-key {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+@media (min-width: 720px) {
+  .command-palette-trigger-key {
+    display: inline-block;
+  }
+}
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -1132,6 +1178,158 @@ body.modal-open {
   }
 }
 
+/* --- Command palette --- */
+.command-palette {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(560px, calc(100vw - 48px));
+  max-height: min(60vh, 480px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  flex-direction: column;
+}
+
+/* Reuses the project modal's entrance animation. */
+.command-palette[open] {
+  display: flex;
+  animation: project-modal-in 0.15s ease;
+}
+
+.command-palette::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.command-palette-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.command-palette-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.command-palette-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  padding: 12px 0;
+}
+
+.command-palette-input:focus {
+  outline: none;
+}
+
+.command-palette-input::placeholder {
+  color: var(--text-muted);
+}
+
+.command-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.command-palette-group-heading {
+  padding: 8px 16px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.command-palette-option {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.command-palette-option[aria-selected="true"] {
+  background: var(--overlay-hover);
+  color: var(--accent);
+}
+
+.command-palette-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-palette-option-hint {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.command-palette-option[aria-selected="true"] .command-palette-option-hint {
+  color: var(--accent);
+}
+
+.command-palette-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.command-palette-status {
+  padding: 0 16px;
+  min-height: 1em;
+  font-size: 0.78rem;
+  color: var(--green);
+}
+
+.command-palette-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.command-palette-hint-key {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 600px) {
+  .command-palette {
+    inset: 24px 12px auto;
+    margin: 0;
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 64px);
+  }
+}
+
 /* --- Timeline (Education & Experience) --- */
 .timeline {
   position: relative;
@@ -1480,6 +1678,10 @@ body.modal-open {
   background: rgba(27, 31, 36, 0.4);
 }
 
+:root[data-theme="light"] .command-palette::backdrop {
+  background: rgba(27, 31, 36, 0.4);
+}
+
 /* ============================================
    Reduced motion
    ============================================ */
@@ -1506,8 +1708,13 @@ body.modal-open {
   .btn-secondary:hover,
   .project-card:hover,
   .contact-link:hover,
-  .tag-link:hover {
+  .tag-link:hover,
+  .command-palette-option:hover {
     transform: none;
+  }
+
+  .command-palette[open] {
+    animation: none;
   }
 
   /* Keep the show/hide toggle instant instead of sliding in */
