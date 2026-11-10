@@ -1005,6 +1005,9 @@
           // Never hijack a click on the GitHub/live-demo links or the
           // Details button itself (already handled by its own listener).
           if (e.target.closest('a, button')) return;
+          // A drag-to-select ends in a click; don't treat it as "open".
+          var sel = window.getSelection && window.getSelection();
+          if (sel && !sel.isCollapsed && card.contains(sel.anchorNode)) return;
           openProject(card, true, btn);
         });
       });
