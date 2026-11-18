@@ -872,6 +872,8 @@
     function stepProject(delta) {
       var list = visibleCards();
       if (!list.length) return;
+      // fillModal rebuilds modalBodyEl from scratch, so check this before it runs — after, the old focused clone is already gone.
+      var focusWasInBody = !!(modalBodyEl && modalBodyEl.contains(document.activeElement));
       var currentSlug = projectModal.dataset.openSlug;
       var idx = -1;
       for (var i = 0; i < list.length; i++) {
@@ -893,6 +895,10 @@
       var newHash = '#project=' + nextCard.dataset.slug;
       if (window.location.hash !== newHash) {
         history.replaceState(null, '', newHash);
+      }
+      if (focusWasInBody) {
+        var focusTarget = (delta > 0 ? modalNextBtn : modalPrevBtn) || modalCloseBtn;
+        if (focusTarget) focusTarget.focus();
       }
     }
 
